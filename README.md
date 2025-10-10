@@ -5,7 +5,7 @@ Kő-papír-olló gesztusfelismerő rendszer számítógépes látással.
 ## Telepítés
 
 ```bash
-pip install gradio numpy opencv-python jinja2
+pip install -r requirements.txt
 ```
 
 ## Indítás
@@ -26,15 +26,21 @@ Böngészőben megnyílik: `http://localhost:7860`
 
 ```
 src/
-├── core/              # Pipeline és base osztályok
-├── preprocessing/     # Képfeldolgozás
-├── feature_extraction/# Jellemzők kinyerése
-├── classification/    # Osztályozók
-├── ui/               # Felhasználói felület
-└── app.py            # Indító fájl
+├── core/                  # Pipeline és base osztályok
+├── preprocessing/         # Képfeldolgozás (pl. GrayscaleConverter)
+├── feature_extraction/    # Jellemzők kinyerése (pl. DummyGeometricExtractor)
+├── classification/        # Osztályozók (pl. DummyClassifier)
+├── ui/                    # Felhasználói felület
+│   ├── components/        # UI komponensek (class-alapú)
+│   ├── styles/           # CSS
+│   ├── templates/        # Jinja2 HTML sablonok
+│   └── utils/            # Template engine
+└── app.py                # Indító fájl
 ```
 
 ## Állapot
 
 - ✅ Architektúra kész
+- ✅ Moduláris komponens rendszer
+- ✅ Dummy modulok teszteléshez
 - ⏳ ML modellek fejlesztés alatt
