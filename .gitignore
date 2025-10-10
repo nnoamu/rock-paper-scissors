@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+
+# IDE
+.idea/
+.vscode/
+
+# Data - ignore contents, keep structure
+data/raw/**
+data/splits/**
+data/processed/**
+!data/raw/.gitkeep
+!data/splits/.gitkeep
+!data/processed/.gitkeep
+!data/README.md
+
+# Models - ignore contents, keep structure
+models/**
+!models/.gitkeep
+
+# Model and data files
+*.pkl
+*.npz
+*.h5
+
+# Virtual environment (if used)
+venv/
+env/
