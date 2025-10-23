@@ -12,4 +12,4 @@ class NoBatchConstraint(Constraint):
     
     @property
     def description(self) -> str:
-        return super().description+": Az adat nem lehet kötegelt. Az is_batch adattag False kell legyen."
+        return super().description+": Batch data is not allowed. The is_batch property must be False."

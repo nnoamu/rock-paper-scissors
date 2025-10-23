@@ -6,7 +6,7 @@ from typing import List
 
 class ConstraintViolationException(Exception):
     def __init__(self, moduleName: str, violations: List[str]):
-        msg="Hiba: "+moduleName+" input korlátozásai nem teljesülnek. A sértett korlátozások:\n"
+        msg="Error: "+moduleName+"'s input constraints aren't met. Violated restrictions:\n"
         for s in violations:
             msg+=" - "+s+"\n"
         super().__init__(msg)

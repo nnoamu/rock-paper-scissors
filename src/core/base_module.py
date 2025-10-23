@@ -16,7 +16,7 @@ class BaseModule(ABC):
         self.__constraints: List[Constraint]=[]
     
     @final
-    def __validateInput(self, data: DataObject) -> Tuple[bool, List[str]]:
+    def __validate_input(self, data: DataObject) -> Tuple[bool, List[str]]:
         success=True
         msg=[]
 
@@ -33,17 +33,17 @@ class BaseModule(ABC):
 
     @final
     def process(self, input: DataObject) -> DataObject:
-        success, msg=self.__validateInput(input)
+        success, msg=self.__validate_input(input)
         if not success:
             raise ConstraintViolationException(self.name, msg)
         return self._process(input)
     
     @final
-    def addConstraint(self, constraint: Constraint):
+    def add_constraint(self, constraint: Constraint):
         self.__constraints.append(constraint)
     
     @final
-    def getConstraints(self) -> List[Constraint]:
+    def get_constraints(self) -> List[Constraint]:
         return self.__constraints
 
     def __str__(self) -> str:
