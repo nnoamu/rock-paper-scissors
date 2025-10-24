@@ -175,6 +175,7 @@ atlassian-ide-plugin.xml
 data/raw/**
 data/splits/**
 data/processed/**
+data/mediapipe_features/**
 !data/raw/.gitkeep
 !data/splits/.gitkeep
 !data/processed/.gitkeep

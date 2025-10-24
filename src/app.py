@@ -11,7 +11,9 @@ sys.path.insert(0, str(src_path))
 from core.pipeline import ProcessingPipeline
 from preprocessing.grayscale import GrayscaleConverter
 from feature_extraction.dummy_geometric_extractor import DummyGeometricExtractor
+from feature_extraction.mediapipe_hand_extractor import MediaPipeHandExtractor
 from classification.dummy_classifier import DummyClassifier
+from classification.random_forest_classifier import MediaPipeRFClassifier
 from ui.main_interface import MainInterface
 
 
@@ -19,12 +21,24 @@ def main():
     pipeline = ProcessingPipeline()
     interface = MainInterface(pipeline)
 
+    # Preprocessors
     interface.register_preprocessor("None", None)
     interface.register_preprocessor("Grayscale", GrayscaleConverter())
 
+    # Feature Extractors
     interface.register_feature_extractor("Geometric (Dummy)", DummyGeometricExtractor())
+    interface.register_feature_extractor("MediaPipe Hand Landmarks", MediaPipeHandExtractor())
 
+    # Classifiers
     interface.register_classifier("Simple Dummy", DummyClassifier())
+
+    # MediaPipe RF Classifier (load model if exists)
+    try:
+        rf_classifier = MediaPipeRFClassifier()
+        rf_classifier.load_model()
+        interface.register_classifier("Random Forest (MediaPipe)", rf_classifier)
+    except FileNotFoundError:
+        print("⚠️  MediaPipe RF model not found. Train it with: python scripts/train_mediapipe_rf.py")
 
     demo = interface.create_interface()
 
