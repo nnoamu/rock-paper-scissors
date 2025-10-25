@@ -12,7 +12,7 @@ Példa használat:
     pipeline.set_feature_extractor(MyExtractor())
     pipeline.set_classifier(MyClassifier())
 
-    preprocessed, features, result = pipeline.process_full_pipeline(image)
+    preprocessed, features, result, annotated = pipeline.process_full_pipeline(image)
 """
 
 from typing import List, Optional
@@ -64,7 +64,8 @@ class ProcessingPipeline:
         preprocessed = self.preprocess_image(image)
         features = self.extract_features(preprocessed)
         result = self.classify(features)
-        return preprocessed, features, result
+        annotated = self.feature_extractor.visualize(preprocessed, features)
+        return preprocessed, features, result, annotated
 
     def get_pipeline_info(self) -> str:
         parts = []

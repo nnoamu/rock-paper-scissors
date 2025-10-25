@@ -36,5 +36,8 @@ class BaseFeatureExtractor(ABC):
     def get_feature_dimension(self) -> int:
         pass
 
+    def visualize(self, image: np.ndarray, features: FeatureVector) -> np.ndarray:
+        return image.copy()
+
     def __str__(self) -> str:
         return self.name

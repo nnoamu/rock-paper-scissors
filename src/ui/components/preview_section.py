@@ -9,16 +9,17 @@ import numpy as np
 from typing import Optional, Literal
 from ui.utils import render
 
-DisplayMode = Literal["Original", "Preprocessed"]
+DisplayMode = Literal["Original", "Preprocessed", "Annotated"]
 
 
 class PreviewSection:
     def __init__(self):
         self.image_component = None
         self.radio_component = None
-        self.display_mode: DisplayMode = "Original"
+        self.display_mode: DisplayMode = "Annotated"
         self.original_image: Optional[np.ndarray] = None
         self.preprocessed_image: Optional[np.ndarray] = None
+        self.annotated_image: Optional[np.ndarray] = None
 
     def create(self):
         with gr.Column():
@@ -28,7 +29,7 @@ class PreviewSection:
                         gr.HTML(render('section_label.html', icon="🖼️", title="Image Preview"))
                     with gr.Column(scale=1):
                         self.radio_component = gr.Radio(
-                            choices=["Original", "Preprocessed"],
+                            choices=["Original", "Preprocessed", "Annotated"],
                             value=self.display_mode,
                             label="",
                             container=False,
@@ -45,9 +46,11 @@ class PreviewSection:
 
         return self.image_component, self.radio_component
 
-    def set_images(self, original: Optional[np.ndarray], preprocessed: Optional[np.ndarray]):
+    def set_images(self, original: Optional[np.ndarray], preprocessed: Optional[np.ndarray],
+                   annotated: Optional[np.ndarray] = None):
         self.original_image = original
         self.preprocessed_image = preprocessed
+        self.annotated_image = annotated
 
     def set_display_mode(self, mode: DisplayMode):
         self.display_mode = mode
@@ -55,7 +58,9 @@ class PreviewSection:
     def get_current_image(self) -> Optional[np.ndarray]:
         if self.display_mode == "Original":
             return self.original_image
-        else:
+        elif self.display_mode == "Annotated":
+            return self.annotated_image if self.annotated_image is not None else self.original_image
+        else:  # Preprocessed
             return self.preprocessed_image if self.preprocessed_image is not None else self.original_image
 
     def update_display(self, mode: DisplayMode) -> Optional[np.ndarray]:
@@ -65,4 +70,5 @@ class PreviewSection:
     def clear(self):
         self.original_image = None
         self.preprocessed_image = None
+        self.annotated_image = None
         return None
