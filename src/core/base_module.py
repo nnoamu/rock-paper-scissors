@@ -38,7 +38,7 @@ class BaseModule(ABC):
             if not success:
                 raise ConstraintViolationException(self.name, msg)
             return self._process(input)
-        
+
         if isinstance(input, DataObject):
             return process_single(input)
         elif isinstance(input, list):

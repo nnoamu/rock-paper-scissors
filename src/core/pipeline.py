@@ -66,8 +66,10 @@ class ProcessingPipeline:
         result = self.classify(features)
 
         if isinstance(preprocessed, list):
-            annotated_single = self.feature_extractor.visualize(preprocessed[0].data, features[0])
-            annotated = [annotated_single] * len(preprocessed)
+            annotated = [
+                self.feature_extractor.visualize(preprocessed[i].data, features[i])
+                for i in range(len(preprocessed))
+            ]
         else:
             annotated = self.feature_extractor.visualize(preprocessed.data, features)
 

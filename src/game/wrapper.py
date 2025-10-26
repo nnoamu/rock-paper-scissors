@@ -7,7 +7,10 @@ from .game_result import GameResult
 
 
 class TwoPlayerGameWrapper:
-    """Pipeline wrapper két játékos mód támogatásához. Képet kettévágja, mindkét félen lefuttatja a pipeline-t, majd kiértékeli a játékot."""
+    """
+    Pipeline wrapper két játékos mód támogatásához.
+    A pipeline ImageSplitterModule-t kell tartalmazzon, ami batch-et csinál a két félből.
+    """
 
     def __init__(self, pipeline: ProcessingPipeline, min_confidence: float = 0.7):
         self.pipeline = pipeline
@@ -18,25 +21,36 @@ class TwoPlayerGameWrapper:
         return game_result
 
     def run_with_visualization(self, image: np.ndarray) -> tuple:
-        height, width = image.shape[:2]
-        mid_point = width // 2
+        preprocessed, features, results, annotated = self.pipeline.process_full_pipeline(image)
 
-        left_half = image[:, :mid_point]
-        right_half = image[:, mid_point:]
+        if not isinstance(results, list) or len(results) != 2:
+            from core.classification_result import ClassificationResult, GestureClass
+            dummy_result = ClassificationResult(
+                predicted_class=GestureClass.UNKNOWN,
+                confidence=0.0,
+                class_probabilities={},
+                processing_time_ms=0.0,
+                classifier_name="None"
+            )
+            return GameResult(
+                player1_result=dummy_result,
+                player2_result=dummy_result,
+                winner=None,
+                status='invalid',
+                reason=f"Pipeline did not return 2 results (got: {len(results) if isinstance(results, list) else 'not a list'})"
+            ), image
 
-        preprocessed_left, features_left, player1_result, annotated_left = self.pipeline.process_full_pipeline(left_half)
-        preprocessed_right, features_right, player2_result, annotated_right = self.pipeline.process_full_pipeline(right_half)
-
-        if isinstance(player1_result, list):
-            player1_result = player1_result[0]
-        if isinstance(player2_result, list):
-            player2_result = player2_result[0]
-        if isinstance(annotated_left, list):
-            annotated_left = annotated_left[0]
-        if isinstance(annotated_right, list):
-            annotated_right = annotated_right[0]
+        player1_result = results[0]
+        player2_result = results[1]
 
         game_result = self.evaluator.evaluate(player1_result, player2_result)
+
+        if isinstance(annotated, list) and len(annotated) >= 2:
+            annotated_left = annotated[0]
+            annotated_right = annotated[1]
+        else:
+            annotated_left = preprocessed[0].data if isinstance(preprocessed, list) else image[:, :image.shape[1]//2]
+            annotated_right = preprocessed[1].data if isinstance(preprocessed, list) else image[:, image.shape[1]//2:]
 
         annotated_combined = self._combine_annotated_halves(
             annotated_left, annotated_right, game_result

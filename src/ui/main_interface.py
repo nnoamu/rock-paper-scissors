@@ -195,13 +195,18 @@ class MainInterface:
                 self.debug_log.get_text()
             )
 
-        # Setup pipeline (same as single mode)
+        # Setup pipeline for game mode
         self.pipeline.clear_preprocessing()
+
+        from preprocessing.image_splitter import ImageSplitterModule
+        self.pipeline.add_preprocessing(ImageSplitterModule())
+        self.debug_log.append(f"[Stage 1a] Image Splitter: Split image for 2-player batch mode")
+
         if preprocessing_name in self.preprocessors and self.preprocessors[preprocessing_name] is not None:
             self.pipeline.add_preprocessing(self.preprocessors[preprocessing_name])
-            self.debug_log.append(f"[Stage 1] Preprocessing: {preprocessing_name}")
+            self.debug_log.append(f"[Stage 1b] Additional Preprocessing: {preprocessing_name}")
         else:
-            self.debug_log.append(f"[Stage 1] Preprocessing: None")
+            self.debug_log.append(f"[Stage 1b] Additional Preprocessing: None")
 
         if feature_extractor_name not in self.feature_extractors:
             self.debug_log.append("[Stage 2] ERROR: No feature extractor selected")
