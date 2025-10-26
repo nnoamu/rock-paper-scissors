@@ -15,6 +15,7 @@ import numpy as np
 import mediapipe as mp
 from core.base_feature_extractor import BaseFeatureExtractor
 from core.feature_vector import FeatureVector, FeatureType
+from core.data_object import DataObject
 
 
 class MediaPipeHandExtractor(BaseFeatureExtractor):
@@ -23,6 +24,8 @@ class MediaPipeHandExtractor(BaseFeatureExtractor):
     def __init__(self):
         super().__init__(name="MediaPipe_Hand_Landmarks")
         self.mp_hands = mp.solutions.hands
+        self.mp_drawing = mp.solutions.drawing_utils
+        self.mp_drawing_styles = mp.solutions.drawing_styles
         self._hands = self.mp_hands.Hands(
             static_image_mode=False,
             max_num_hands=1,
@@ -31,8 +34,10 @@ class MediaPipeHandExtractor(BaseFeatureExtractor):
             model_complexity=0
         )
 
-    def extract(self, preprocessed_image: np.ndarray) -> FeatureVector:
+    def _process(self, input: DataObject) -> FeatureVector:
         start_time = time.perf_counter()
+
+        preprocessed_image = input.data
 
         if len(preprocessed_image.shape) == 2:
             image_rgb = cv2.cvtColor(preprocessed_image, cv2.COLOR_GRAY2RGB)
@@ -46,7 +51,7 @@ class MediaPipeHandExtractor(BaseFeatureExtractor):
         if not results.multi_hand_landmarks:
             features = np.zeros(self.FEATURE_DIMENSION, dtype=np.float32)
             named_features = None
-            metadata = {'hand_detected': False}
+            metadata = {'hand_detected': False, 'landmarks': None}
         else:
             hand_landmarks = results.multi_hand_landmarks[0]
             landmarks_list = []
@@ -56,7 +61,11 @@ class MediaPipeHandExtractor(BaseFeatureExtractor):
 
             features = np.array(landmarks_list, dtype=np.float32)
             named_features = None
-            metadata = {'hand_detected': True, 'num_landmarks': 21}
+            metadata = {
+                'hand_detected': True,
+                'num_landmarks': 21,
+                'landmarks': hand_landmarks
+            }
 
         end_time = time.perf_counter()
         extraction_time = (end_time - start_time) * 1000
@@ -72,6 +81,26 @@ class MediaPipeHandExtractor(BaseFeatureExtractor):
 
     def get_feature_dimension(self) -> int:
         return self.FEATURE_DIMENSION
+
+    def visualize(self, image: np.ndarray, features: FeatureVector) -> np.ndarray:
+        """Draw hand landmarks on the image."""
+        annotated_image = image.copy()
+
+        if len(annotated_image.shape) == 2:
+            annotated_image = cv2.cvtColor(annotated_image, cv2.COLOR_GRAY2BGR)
+
+        if features.metadata and features.metadata.get('hand_detected', False):
+            landmarks = features.metadata.get('landmarks')
+            if landmarks:
+                self.mp_drawing.draw_landmarks(
+                    annotated_image,
+                    landmarks,
+                    self.mp_hands.HAND_CONNECTIONS,
+                    self.mp_drawing_styles.get_default_hand_landmarks_style(),
+                    self.mp_drawing_styles.get_default_hand_connections_style()
+                )
+
+        return annotated_image
 
     def close(self):
         if self._hands:

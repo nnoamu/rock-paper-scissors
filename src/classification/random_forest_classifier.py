@@ -16,6 +16,8 @@ from sklearn.ensemble import RandomForestClassifier as SklearnRF
 from core.base_classifier import BaseClassifier
 from core.feature_vector import FeatureVector
 from core.classification_result import ClassificationResult, GestureClass
+from core.data_object import DataObject
+from typing import cast
 
 
 class MediaPipeRFClassifier(BaseClassifier):
@@ -46,8 +48,11 @@ class MediaPipeRFClassifier(BaseClassifier):
 
         self.is_trained = True
 
-    def classify(self, features: FeatureVector) -> ClassificationResult:
+    def _process(self, input: DataObject) -> ClassificationResult:
         start_time = time.perf_counter()
+
+        # BaseClassifier constraint ensures this is a FeatureVector
+        features = cast(FeatureVector, input)
 
         if not self.is_trained or self.model is None:
             raise RuntimeError("Model not loaded. Call load_model() first.")
