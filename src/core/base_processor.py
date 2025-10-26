@@ -1,26 +1,32 @@
 """
 Előfeldolgozó modulok ősosztálya.
+Tartalmazott korlátozások:
+- ImageLikeConstraint
 
-Példa használat:
+Példa használat: Gauss-szűrés 1 képre
     class MyPreprocessor(PreprocessingModule):
-        def process(self, image: np.ndarray) -> np.ndarray:
-            return cv2.GaussianBlur(image, (5, 5), 0)
+        def _process(self, input: DataObject) -> DataObject:
+            return Dataobject(cv2.GaussianBlur(input.data, (5, 5), 0))
 """
 
-from abc import ABC, abstractmethod
-from typing import Any, Dict
-import numpy as np
+from .base_module import BaseModule
+from constraints import ImageLikeConstraint
+from typing import Any, Dict, List, final
+
+from .data_object import DataObject
 
 
-class PreprocessingModule(ABC):
+class PreprocessingModule(BaseModule):
 
     def __init__(self, name: str):
-        self.name = name
-        self.params: Dict[str, Any] = {}
+        super().__init__(name)
+        self.add_constraint(ImageLikeConstraint())
 
-    @abstractmethod
-    def process(self, image: np.ndarray) -> np.ndarray:
-        pass
+        self.params: Dict[str, Any] = {}
+    
+    @final
+    def preprocess(self, image: DataObject | List[DataObject]) -> DataObject | List[DataObject]:
+        return self.process(image)
 
     def get_parameters(self) -> Dict[str, Any]:
         return {}
@@ -29,6 +35,3 @@ class PreprocessingModule(ABC):
         for key, value in kwargs.items():
             if key in self.params:
                 self.params[key] = value
-
-    def __str__(self) -> str:
-        return self.name

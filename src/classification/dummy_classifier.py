@@ -10,6 +10,8 @@ import time
 from core.base_classifier import BaseClassifier
 from core.feature_vector import FeatureVector
 from core.classification_result import ClassificationResult, GestureClass
+from core import DataObject
+from typing import cast
 
 
 class DummyClassifier(BaseClassifier):
@@ -17,9 +19,10 @@ class DummyClassifier(BaseClassifier):
     def __init__(self):
         super().__init__(name="Dummy_Classifier")
 
-    def classify(self, features: FeatureVector) -> ClassificationResult:
+    def _process(self, input: DataObject) -> ClassificationResult:
         start_time = time.perf_counter()
 
+        features=cast(FeatureVector, input)     #BaseClassifier default constraint miatt tudjuk
         first_feature = abs(features.features[0])
 
         if first_feature < 0.33:

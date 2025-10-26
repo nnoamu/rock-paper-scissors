@@ -50,7 +50,7 @@ class FeatureVector(DataObject):
         if len(features.shape)>1:
             raise TypeError("'features' must be 1 dimensional")
 
-        super().__init__(data=features, is_batch=False, named_data=named_features, metadata=metadata)
+        super().__init__(data=features, named_data=named_features, metadata=metadata)
         self.feature_type=feature_type
         
         self.extractor_name=extractor_name

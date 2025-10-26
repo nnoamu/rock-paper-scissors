@@ -100,6 +100,24 @@ class MainInterface:
 
             preprocessed, features, result = self.pipeline.process_full_pipeline(image)
 
+            # ==================================================
+            # átmeneti megoldás: ha lista a pipeline output, akkor csak az 1. elemekkel foglalkozunk
+
+            if isinstance(preprocessed, list):
+                self.debug_log.append(f"preproc count: {len(preprocessed)}")
+                preprocessed=preprocessed[0].data
+            else:
+                preprocessed=preprocessed.data
+            if isinstance(features, list):
+                self.debug_log.append(f"features count: {len(features)}")
+                features=features[0]
+            if isinstance(result, list):
+                self.debug_log.append(f"classifications count: {len(result)}")
+                result=result[0]
+            
+            # átmeneti megoldás vége
+            # ==================================================
+
             self.processed_image = preprocessed
             self.current_features = features
 
