@@ -10,6 +10,7 @@ sys.path.insert(0, str(src_path))
 
 from core.pipeline import ProcessingPipeline
 from preprocessing.grayscale import GrayscaleConverter
+from preprocessing.channel_splitter import ChannelSplitter
 from feature_extraction.dummy_geometric_extractor import DummyGeometricExtractor
 from classification.dummy_classifier import DummyClassifier
 from ui.main_interface import MainInterface
@@ -21,6 +22,7 @@ def main():
 
     interface.register_preprocessor("None", None)
     interface.register_preprocessor("Grayscale", GrayscaleConverter())
+    interface.register_preprocessor("Split", ChannelSplitter())
 
     interface.register_feature_extractor("Geometric (Dummy)", DummyGeometricExtractor())
 

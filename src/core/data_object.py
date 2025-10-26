@@ -11,7 +11,6 @@ class DataObject:
     data: Final[np.ndarray]
     named_data: Optional[Dict[str, Any]]
     
-    is_batch: Final[bool]
     dimension: Final[int]
     shape: Final[tuple]
     dtype: Final[np.dtype]
@@ -23,13 +22,12 @@ class DataObject:
     def description() -> str:
         return "General data object. Can hold data of any type, shape etc."
 
-    def __init__(self, data: np.ndarray, is_batch: bool, named_data: Optional[Dict[str, Any]]=None, metadata: Optional[Dict[str, Any]]=None):
+    def __init__(self, data: np.ndarray, named_data: Optional[Dict[str, Any]]=None, metadata: Optional[Dict[str, Any]]=None):
         self.data=data
-        self.is_batch=is_batch
         self.named_data=named_data
         self.metadata=metadata
 
-        self.shape=self.data.shape[(1 if is_batch else 0) :]
+        self.shape=self.data.shape
         self.dimension=len(self.shape)
         self.dtype=data.dtype
         self.min_val=np.min(self.data)

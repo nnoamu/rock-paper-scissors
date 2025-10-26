@@ -2,7 +2,6 @@
 Általános keret a modulok megengedett bemenetére vonatkozó korlátozások definiálásához.
 """
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, Final
 from .data_object import DataObject
 
 class Constraint(ABC):
