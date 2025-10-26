@@ -188,3 +188,6 @@ models/**
 *.pkl
 *.npz
 *.h5
+
+# I like testing stuff here and I don't wanna delete it every time :D (Gergo)
+src/test.py

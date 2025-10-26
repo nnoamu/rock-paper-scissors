@@ -23,7 +23,7 @@ from .base_feature_extractor import BaseFeatureExtractor
 from .base_classifier import BaseClassifier
 from .feature_vector import FeatureVector
 from .classification_result import ClassificationResult
-
+from .data_object import DataObject
 
 class ProcessingPipeline:
 
@@ -38,8 +38,8 @@ class ProcessingPipeline:
     def clear_preprocessing(self):
         self.preprocessing_modules.clear()
 
-    def preprocess_image(self, image: np.ndarray) -> np.ndarray:
-        processed = image.copy()
+    def preprocess_image(self, image: np.ndarray) -> DataObject | List[DataObject]:
+        processed = DataObject(image.copy())
         for module in self.preprocessing_modules:
             processed = module.process(processed)
         return processed
@@ -47,7 +47,7 @@ class ProcessingPipeline:
     def set_feature_extractor(self, extractor: BaseFeatureExtractor):
         self.feature_extractor = extractor
 
-    def extract_features(self, preprocessed_image: np.ndarray) -> FeatureVector:
+    def extract_features(self, preprocessed_image: DataObject | List[DataObject]) -> FeatureVector | List[FeatureVector]:
         if self.feature_extractor is None:
             raise RuntimeError("No feature extractor set. Call set_feature_extractor() first.")
         return self.feature_extractor.extract(preprocessed_image)
@@ -55,7 +55,7 @@ class ProcessingPipeline:
     def set_classifier(self, classifier: BaseClassifier):
         self.classifier = classifier
 
-    def classify(self, features: FeatureVector) -> ClassificationResult:
+    def classify(self, features: FeatureVector | List[FeatureVector]) -> ClassificationResult | List[ClassificationResult]:
         if self.classifier is None:
             raise RuntimeError("No classifier set. Call set_classifier() first.")
         return self.classifier.classify(features)
