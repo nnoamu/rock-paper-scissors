@@ -1,5 +1,7 @@
 """
 Az összes modul közös ősosztálya.
+Támogatja a batch inference optimalizációt: ha a modul implementálja a _process_batch() metódust,
+akkor azt használja batch esetén.
 """
 
 from abc import ABC, abstractmethod
@@ -14,7 +16,7 @@ class BaseModule(ABC):
     def __init__(self, name: str):
         self.name: Final[str] = name
         self.__constraints: List[Constraint]=[]
-    
+
     @final
     def __validate_input(self, data: DataObject) -> Tuple[bool, List[str]]:
         success=True
@@ -26,10 +28,13 @@ class BaseModule(ABC):
                 msg.append(constraint.description)
 
         return (success, msg)
-    
+
     @abstractmethod
     def _process(self, input: DataObject) -> DataObject | List[DataObject]:
         pass
+
+    def _process_batch(self, inputs: List[DataObject]) -> List[DataObject | List[DataObject]]:
+        raise NotImplementedError(f"{self.name} does not implement batch processing")
 
     @final
     def process(self, input: DataObject | List[DataObject]) -> DataObject | List[DataObject]:
@@ -42,17 +47,34 @@ class BaseModule(ABC):
         if isinstance(input, DataObject):
             return process_single(input)
         elif isinstance(input, list):
-            all=[]
             for x in input:
                 if not isinstance(x, DataObject):
                     raise Exception("Error in "+self.name+": List element is not DataObject")
-                x=process_single(x)
+                success, msg = self.__validate_input(x)
+                if not success:
+                    raise ConstraintViolationException(self.name, msg)
 
-                if isinstance(x, DataObject):
-                    all.append(x)
-                else:   #list[DataObject]
-                    all.extend(x)
-            return all
+            try:
+                results = self._process_batch(input)
+                all = []
+                for result in results:
+                    if isinstance(result, DataObject):
+                        all.append(result)
+                    elif isinstance(result, list):
+                        all.extend(result)
+                    else:
+                        raise Exception(f"Error in {self.name}: Invalid batch result type")
+                return all
+            except NotImplementedError:
+                all=[]
+                for x in input:
+                    x=process_single(x)
+
+                    if isinstance(x, DataObject):
+                        all.append(x)
+                    else:
+                        all.extend(x)
+                return all
         #else:
         raise Exception("Error in"+self.name+": Invalid input type.")
     
