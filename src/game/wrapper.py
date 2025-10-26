@@ -24,8 +24,17 @@ class TwoPlayerGameWrapper:
         left_half = image[:, :mid_point]
         right_half = image[:, mid_point:]
 
-        _, _, player1_result, annotated_left = self.pipeline.process_full_pipeline(left_half)
-        _, _, player2_result, annotated_right = self.pipeline.process_full_pipeline(right_half)
+        preprocessed_left, features_left, player1_result, annotated_left = self.pipeline.process_full_pipeline(left_half)
+        preprocessed_right, features_right, player2_result, annotated_right = self.pipeline.process_full_pipeline(right_half)
+
+        if isinstance(player1_result, list):
+            player1_result = player1_result[0]
+        if isinstance(player2_result, list):
+            player2_result = player2_result[0]
+        if isinstance(annotated_left, list):
+            annotated_left = annotated_left[0]
+        if isinstance(annotated_right, list):
+            annotated_right = annotated_right[0]
 
         game_result = self.evaluator.evaluate(player1_result, player2_result)
 

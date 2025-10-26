@@ -64,7 +64,13 @@ class ProcessingPipeline:
         preprocessed = self.preprocess_image(image)
         features = self.extract_features(preprocessed)
         result = self.classify(features)
-        annotated = self.feature_extractor.visualize(preprocessed, features)
+
+        if isinstance(preprocessed, list):
+            annotated_single = self.feature_extractor.visualize(preprocessed[0].data, features[0])
+            annotated = [annotated_single] * len(preprocessed)
+        else:
+            annotated = self.feature_extractor.visualize(preprocessed.data, features)
+
         return preprocessed, features, result, annotated
 
     def get_pipeline_info(self) -> str:
