@@ -10,14 +10,14 @@ from core.base_constraint import Constraint
 class TypeConstraint(Constraint):
 
     def __init__(self, type: Type):
-        self.__requiredType: Final[Type]=type
+        self.__required_type: Final[Type]=type
 
     def check(self, data: DataObject) -> bool:
-        return data.dtype==self.__requiredType
+        return data.dtype==self.__required_type
     
-    def getRequiredType(self) -> Type:
-        return self.__requiredType
+    def get_required_type(self) -> Type:
+        return self.__required_type
     
     @property
     def description(self) -> str:
-        return super().description+": Az adat elemeinek típusa ["+str(self.__requiredType)+"] kell legyen."
+        return super().description+": The data type must be ["+str(self.__required_type)+"]."

@@ -9,6 +9,7 @@ import time
 
 from core.base_feature_extractor import BaseFeatureExtractor
 from core.feature_vector import FeatureVector, FeatureType
+from core import DataObject
 
 
 class DummyGeometricExtractor(BaseFeatureExtractor):
@@ -18,13 +19,13 @@ class DummyGeometricExtractor(BaseFeatureExtractor):
     def __init__(self):
         super().__init__(name="Dummy_Geometric")
 
-    def extract(self, preprocessed_image: np.ndarray) -> FeatureVector:
+    def _process(self, input: DataObject) -> FeatureVector:
         start_time = time.perf_counter()
 
-        if len(preprocessed_image.shape) == 3:
-            gray = cv2.cvtColor(preprocessed_image, cv2.COLOR_BGR2GRAY)
+        if len(input.shape) == 3:
+            gray = cv2.cvtColor(input.data, cv2.COLOR_BGR2GRAY)
         else:
-            gray = preprocessed_image
+            gray = input.data
 
         avg_brightness = np.mean(gray) / 255.0
         height, width = gray.shape[:2]
@@ -49,7 +50,7 @@ class DummyGeometricExtractor(BaseFeatureExtractor):
             features=features,
             feature_dimension=self.FEATURE_DIMENSION,
             named_features=named_features,
-            metadata={'image_shape': preprocessed_image.shape}
+            metadata={'image_shape': input.shape}
         )
 
     def get_feature_dimension(self) -> int:

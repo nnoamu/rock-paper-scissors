@@ -20,10 +20,6 @@ class FeatureVector(DataObject):
     feature_type: FeatureType
     extractor_name: str                # -> metadata?
     extraction_time_ms: float          # -> metadata?
-    #features: np.ndarray
-    #feature_dimension: int
-    #named_features: Optional[Dict[str, float]] = None
-    #metadata: Dict[str, Any] = {}
 
     @property
     def features(self) -> np.ndarray:
@@ -49,12 +45,12 @@ class FeatureVector(DataObject):
             features: np.ndarray,
             feature_dimension: int=1,                                 # bennhagyva kompatibilitás miatt; a DataObject ezt kiszámítja, meg amúgy is 1D vektorról beszéltünk feature vektornak
             named_features: Optional[Dict[str, float]] = None,
-            metadata: Optional[Dict[str, Any]] = {}
+            metadata: Optional[Dict[str, Any]] = None
         ):
         if len(features.shape)>1:
             raise TypeError("'features' must be 1 dimensional")
 
-        super().__init__(data=features, is_batch=False, named_data=named_features, metadata=metadata)
+        super().__init__(data=features, named_data=named_features, metadata=metadata)
         self.feature_type=feature_type
         
         self.extractor_name=extractor_name
