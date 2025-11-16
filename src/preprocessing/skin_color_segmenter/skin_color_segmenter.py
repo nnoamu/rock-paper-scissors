@@ -1,18 +1,16 @@
 """
 Bőrszín alapú szegmentáló modul.
-RGB képet bináris képpé alakít. A fehér pixelek jelölik azt, hogy az adott helyen bőrszínű pixel volt.
+RGB képet szürkeárnyalatos [0-1] képpé alakít. A pixelek értékei jelölik, hogy az adott helyen milyen valószínűséggel bőrszínű a pixel.
 """
 
 import torch
 from configparser import ConfigParser
 from pathlib import Path
-from typing import List
 import numpy as np
 from core.base_processor import PreprocessingModule
 from core import DataObject
 from constraints import TypeConstraint, RGBImageConstraint
 from .skin_color_segmenter_network import SkinColorSegmenterNetwork
-import cv2
 
 class SkinColorSegmenterModule(PreprocessingModule):
 
@@ -44,7 +42,8 @@ class SkinColorSegmenterModule(PreprocessingModule):
             img=self.model(img)
         
         img=img.reshape((height, width)).cpu()
-        img=np.array((img>0.1)*255, dtype=np.uint8)
+        img=np.array(img*255, dtype=np.uint8)
+        #img=np.array((img>0.8)*64+(img>0.6)*63+(img>0.4)*63+(img>0.2)*63, dtype=np.uint8)
 
         return DataObject(img)
 
