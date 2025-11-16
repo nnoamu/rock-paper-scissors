@@ -8,7 +8,7 @@ from pathlib import Path
 src_path = Path(__file__)
 sys.path.insert(0, str(src_path))
 
-from core.pipeline import ProcessingPipeline
+from core.pipe_network import ProcessingPipeNetwork
 from preprocessing.grayscale import GrayscaleConverter
 from preprocessing.channel_splitter import ChannelSplitter
 from preprocessing import SkinColorSegmenterModule, GaussianBlurModule, EdgeDetectorModule
@@ -19,7 +19,7 @@ from game import TwoPlayerGameWrapper
 
 
 def main():
-    pipeline = ProcessingPipeline()
+    pipeline = ProcessingPipeNetwork()
     interface = MainInterface(pipeline)
 
     interface.register_preprocessor("None", None)
