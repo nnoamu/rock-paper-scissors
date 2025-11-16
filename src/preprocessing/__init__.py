@@ -8,6 +8,7 @@ from preprocessing.skin_color_segmenter.skin_color_segmenter import SkinColorSeg
 from preprocessing.skin_color_segmenter.skin_color_segmenter_network import SkinColorSegmenterNetwork
 from preprocessing.gaussian_blur import GaussianBlurModule
 from preprocessing.edge_detector import EdgeDetectorModule
+from preprocessing.threshold_fill import ThresholdFillModule
 
 __all__ = [
     'GrayscaleConverter',
@@ -16,5 +17,6 @@ __all__ = [
     'SkinColorSegmenterModule',
     'SkinColorSegmenterNetwork',
     'GaussianBlurModule',
-    'EdgeDetectorModule'
+    'EdgeDetectorModule',
+    'ThresholdFillModule'
 ]
