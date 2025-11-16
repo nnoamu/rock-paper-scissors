@@ -1,6 +1,6 @@
 """
 Bőrszín alapú szegmentáló modul.
-RGB képet szürkeárnyalatos [0-1] képpé alakít. A pixelek értékei jelölik, hogy az adott helyen milyen valószínűséggel bőrszínű a pixel.
+RGB képet szürkeárnyalatos uint8 képpé alakít. A pixelek értékei jelölik, hogy az adott helyen milyen valószínűséggel bőrszínű a pixel (0 -> 0%, 255 -> 100).
 """
 
 import torch
@@ -26,7 +26,7 @@ class SkinColorSegmenterModule(PreprocessingModule):
         
         self.device='cuda' if torch.cuda.is_available() else 'cpu'
         self.model=SkinColorSegmenterNetwork(num_layers=int(config["NETWORK"]["num_layers"]), layer_density=int(config["NETWORK"]["layer_density"]))
-        self.model.load_state_dict(torch.load(Path(model_path).joinpath('model.pth')))
+        self.model.load_state_dict(torch.load(Path(model_path).joinpath('model.pth'), weights_only=True), assign=True)
         self.model.to(self.device)
         self.model.eval()
 
@@ -43,7 +43,6 @@ class SkinColorSegmenterModule(PreprocessingModule):
         
         img=img.reshape((height, width)).cpu()
         img=np.array(img*255, dtype=np.uint8)
-        #img=np.array((img>0.8)*64+(img>0.6)*63+(img>0.4)*63+(img>0.2)*63, dtype=np.uint8)
 
         return DataObject(img)
 
