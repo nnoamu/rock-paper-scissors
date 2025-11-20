@@ -17,7 +17,7 @@ from constraints import TypeConstraint, DimensionConstraint
 class ThresholdFillModule(PreprocessingModule):
 
     def __init__(self, lower_thresh: float=0.2, upper_thresh: float=0.8):
-        super().__init__(name="GaussianBlur")
+        super().__init__(name="ThresholdFill")
         self.add_constraint(TypeConstraint(np.uint8))
         self.add_constraint(DimensionConstraint(dim=0, length=2))
 
