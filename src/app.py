@@ -16,7 +16,8 @@ from feature_extraction.dummy_geometric_extractor import DummyGeometricExtractor
 from classification.dummy_classifier import DummyClassifier
 from ui.main_interface import MainInterface
 from game import TwoPlayerGameWrapper
-
+from ui.styles.custom_css import get_custom_css
+import gradio as gr
 
 def main():
     pipeline = ProcessingPipeNetwork()
@@ -43,7 +44,9 @@ def main():
     demo.launch(
         share=False,
         server_name="0.0.0.0",
-        server_port=7860
+        server_port=7860,
+        theme=gr.themes.Soft(),
+        css=get_custom_css()
     )
 
 
