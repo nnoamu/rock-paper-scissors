@@ -308,9 +308,7 @@ class MainInterface:
 
     def create_interface(self) -> gr.Blocks:
         with gr.Blocks(
-            css=get_custom_css(),
             title="Rock-Paper-Scissors",
-            theme=gr.themes.Soft()
         ) as demo:
 
             create_header()
