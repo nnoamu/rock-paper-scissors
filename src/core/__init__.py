@@ -9,6 +9,7 @@ from core.data_object import DataObject
 from core.feature_vector import FeatureVector, FeatureType
 from core.classification_result import ClassificationResult, GestureClass
 from core.pipeline import ProcessingPipeline
+from core.pipe_network import ProcessingPipeNetwork
 from core.base_constraint import Constraint
 from core.base_module import BaseModule
 from core.constraint_violation_exception import ConstraintViolationException
@@ -23,6 +24,7 @@ __all__ = [
     'ClassificationResult',
     'GestureClass',
     'ProcessingPipeline',
+    'ProcessingPipeNetwork',
     'Constraint',
     'BaseModule',
     'ConstraintViolationException'

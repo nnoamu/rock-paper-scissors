@@ -1,0 +1,4 @@
+from preprocessing.skin_color_segmenter.skin_color_segmenter import SkinColorSegmenterModule
+from preprocessing.skin_color_segmenter.skin_color_segmenter_network import SkinColorSegmenterNetwork
+
+__all__ = ['SkinColorSegmenterModule', 'SkinColorSegmenterNetwork']

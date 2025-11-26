@@ -8,9 +8,10 @@ from pathlib import Path
 src_path = Path(__file__)
 sys.path.insert(0, str(src_path))
 
-from core.pipeline import ProcessingPipeline
+from core.pipe_network import ProcessingPipeNetwork
 from preprocessing.grayscale import GrayscaleConverter
 from preprocessing.channel_splitter import ChannelSplitter
+from preprocessing import SkinColorSegmenterModule, GaussianBlurModule, EdgeDetectorModule
 from feature_extraction.dummy_geometric_extractor import DummyGeometricExtractor
 from classification.dummy_classifier import DummyClassifier
 from ui.main_interface import MainInterface
@@ -18,12 +19,16 @@ from game import TwoPlayerGameWrapper
 
 
 def main():
-    pipeline = ProcessingPipeline()
+    pipeline = ProcessingPipeNetwork()
     interface = MainInterface(pipeline)
 
     interface.register_preprocessor("None", None)
     interface.register_preprocessor("Grayscale", GrayscaleConverter())
     interface.register_preprocessor("Split", ChannelSplitter())
+    interface.register_preprocessor("Skin color based (<400)", SkinColorSegmenterModule('models/skin_segmentation/model1'))
+    interface.register_preprocessor("Skin color based (<14000)", SkinColorSegmenterModule('models/skin_segmentation/model2'))
+    interface.register_preprocessor("Blur", GaussianBlurModule())
+    interface.register_preprocessor("Edge detection", EdgeDetectorModule(lower_thresh=0, upper_thresh=40))
 
     interface.register_feature_extractor("Geometric (Dummy)", DummyGeometricExtractor())
 
