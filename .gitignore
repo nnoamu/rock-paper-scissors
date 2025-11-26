@@ -175,10 +175,13 @@ atlassian-ide-plugin.xml
 data/raw/**
 data/splits/**
 data/processed/**
+data/skincolor/**
+
 data/mediapipe_features/**
 !data/raw/.gitkeep
 !data/splits/.gitkeep
 !data/processed/.gitkeep
+!data/skincolor/.gitkeep
 !data/README.md
 
 # Models - ignore contents, keep structure
@@ -192,3 +195,4 @@ models/**
 
 # I like testing stuff here and I don't wanna delete it every time :D (Gergo)
 src/test.py
+test.py
