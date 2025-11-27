@@ -20,7 +20,7 @@ class HuMomentsExtractor(BaseFeatureExtractor):
         start=time.perf_counter()
 
         img=input.data
-        features=[-1*math.copysign(1.0, x)*math.log10(abs(x)) for x in cv2.HuMoments(cv2.moments(img)).flatten()]
+        features=[-1*math.copysign(1.0, x)*math.log10(abs(x)+1e-150) for x in cv2.HuMoments(cv2.moments(img)).flatten()]
         result=FeatureVector(FeatureType.GEOMETRIC, self.name, -1, np.array(features))
         
         process_time=(time.perf_counter()-start)*1000
