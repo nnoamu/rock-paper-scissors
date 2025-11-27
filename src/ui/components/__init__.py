@@ -8,6 +8,7 @@ from ui.components.pipeline_steps import (
     create_step_1,
     create_step_2,
     create_step_3,
+    create_pipeline_steps_block,
     ResultStep
 )
 from ui.components.input_section import (
@@ -26,6 +27,7 @@ __all__ = [
     'create_step_1',
     'create_step_2',
     'create_step_3',
+    'create_pipeline_steps_block',
     'ResultStep',
     'InputSection',
     'ControlsSection',

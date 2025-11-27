@@ -68,6 +68,19 @@ def create_step_3(classifiers):
     return classifier_dropdown
 
 
+def create_pipeline_steps_block(preprocessors, feature_extractors, classifiers):
+
+    with gr.Group():
+        with gr.Row():
+            preproc_dropdown = create_step_1(preprocessors)
+        with gr.Row():
+            feature_dropdown = create_step_2(feature_extractors)
+        with gr.Row():
+            classifier_dropdown = create_step_3(classifiers)
+    
+    return preproc_dropdown, feature_dropdown, classifier_dropdown
+
+
 class ResultStep:
 
     def __init__(self):

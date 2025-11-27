@@ -10,10 +10,7 @@ from typing import Dict, Optional
 from ui.styles import get_custom_css
 from ui.components import (
     create_header,
-    create_pipeline_arrow,
-    create_step_1,
-    create_step_2,
-    create_step_3,
+    create_pipeline_steps_block,
     ResultStep,
     InputSection,
     ControlsSection,
@@ -313,7 +310,7 @@ class MainInterface:
 
             create_header()
 
-            with gr.Row():
+            with gr.Row(equal_height=True):
                 with gr.Column(scale=2):
                     # Game mode selector
                     with gr.Row():
@@ -324,25 +321,26 @@ class MainInterface:
                             info="Single Hand: classify one gesture | Two Player Game: evaluate RPS match"
                         )
 
-                    with gr.Row():
-                        preproc_dropdown = create_step_1(self.preprocessors)
-                        create_pipeline_arrow()
-                        feature_dropdown = create_step_2(self.feature_extractors)
-                        create_pipeline_arrow()
-                        classifier_dropdown = create_step_3(self.classifiers)
-                        create_pipeline_arrow()
-
-                    with gr.Row():
-                        input_image = self.input_section.create()
-                        process_btn = self.controls_section.create()
+                    with gr.Row(equal_height=True):
+                        preproc_dropdown, feature_dropdown, classifier_dropdown = create_pipeline_steps_block(
+                            self.preprocessors,
+                            self.feature_extractors,
+                            self.classifiers
+                        )
+                        
+                        with gr.Row(equal_height=False):
+                            input_image = self.input_section.create()
+                            process_btn = self.controls_section.create()
 
                 with gr.Column(scale=1):
                     class_out, conf_out = self.result_step.create()
                     pipeline_out = self.pipeline_info.create()
-                    log_out = self.debug_log.create()
 
             with gr.Row():
-                output_image, display_radio = self.preview_section.create()
+                with gr.Column(scale=7):
+                    output_image, display_radio = self.preview_section.create()
+                with gr.Column(scale=3):
+                    log_out = self.debug_log.create()
 
             inputs = [
                 input_image,
