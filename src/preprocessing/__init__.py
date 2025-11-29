@@ -1,6 +1,8 @@
 """
 Preprocessing modules package.
 """
+from preprocessing.identity import IdentityPreprocessor
+from preprocessing.downscale import DownscalePreprocessor
 from preprocessing.grayscale import GrayscaleConverter
 from preprocessing.channel_splitter import ChannelSplitter
 from preprocessing.image_splitter import ImageSplitterModule
@@ -13,6 +15,8 @@ from preprocessing.hole_closing import HoleClosingModule
 from preprocessing.edge_smoothing import EdgeSmoothingModule
 
 __all__ = [
+    'IdentityPreprocessor',
+    'DownscalePreprocessor',
     'GrayscaleConverter',
     'ChannelSplitter',
     'ImageSplitterModule',

@@ -1,9 +1,17 @@
 """
-MediaPipe + Random Forest training script.
-FRISSÍTVE: Menti a feature-öket is más classifierek számára!
+MediaPipe Enhanced + Random Forest training script.
+91D feature vector-t használ (normalized landmarks + derived features).
 
-Használat:
-    python scripts/train_mediapipe_rf.py
+Hasznalat:
+    python scripts/training/mediapipe/train_rf.py
+
+Features (91D):
+    - Normalized landmarks (60D): wrist-centered, scale-invariant
+    - Finger angles (15D): 3 joints x 5 fingers
+    - Fingertip-palm distances (5D)
+    - Inter-finger distances (4D)
+    - Finger openness (5D): 0=closed, 1=open
+    - Hand orientation (2D): roll, pitch
 """
 
 import sys
@@ -14,19 +22,14 @@ import cv2
 from pathlib import Path
 from tqdm import tqdm
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
 project_root = Path(__file__).parent.parent.parent.parent
 src_path = project_root / 'src'
 sys.path.insert(0, str(src_path))
 
 from core.data_object import DataObject
-
-project_root = Path(__file__).parent.parent.parent.parent
-src_path = project_root / 'src'
-sys.path.insert(0, str(src_path))
-
-from feature_extraction.mediapipe_hand_extractor import MediaPipeHandExtractor
+from feature_extraction.mediapipe_enhanced_extractor import MediaPipeEnhancedExtractor
 
 
 def load_split_indices(split_file='data/splits/split_indices.json'):
@@ -69,7 +72,7 @@ def extract_features_for_split(extractor, image_paths, indices, data_dir='data/r
 
         # Use DataObject as input
         data_obj = DataObject(image_rgb)
-        feature_vector = extractor.extract(data_obj)  # Fixed: was 'image'
+        feature_vector = extractor.extract(data_obj)
 
         if feature_vector.metadata.get('hand_detected', False):
             features.append(feature_vector.features)
@@ -85,7 +88,7 @@ def extract_features_for_split(extractor, image_paths, indices, data_dir='data/r
 
 def main():
     print("=" * 60)
-    print("MediaPipe + Random Forest Training")
+    print("MediaPipe Enhanced (91D) + Random Forest Training")
     print("=" * 60)
 
     data = load_split_indices()
@@ -100,22 +103,22 @@ def main():
     print(f"  Val: {len(val_indices)}")
     print(f"  Test: {len(test_indices)}")
 
-    extractor = MediaPipeHandExtractor()
+    extractor = MediaPipeEnhancedExtractor()
 
     print("\n[1/5] Extracting training features...")
     X_train, y_train = extract_features_for_split(extractor, image_paths, train_indices)
-    print(f"  ✓ Train: {X_train.shape[0]} samples, {X_train.shape[1]}D features")
+    print(f"  -> Train: {X_train.shape[0]} samples, {X_train.shape[1]}D features")
 
     print("\n[2/5] Extracting validation features...")
     X_val, y_val = extract_features_for_split(extractor, image_paths, val_indices)
-    print(f"  ✓ Val: {X_val.shape[0]} samples")
+    print(f"  -> Val: {X_val.shape[0]} samples")
 
     print("\n[3/5] Extracting test features...")
     X_test, y_test = extract_features_for_split(extractor, image_paths, test_indices)
-    print(f"  ✓ Test: {X_test.shape[0]} samples")
+    print(f"  -> Test: {X_test.shape[0]} samples")
 
     print("\n[4/5] Saving features for reuse...")
-    features_dir = Path('data/mediapipe_features')
+    features_dir = Path('data/mediapipe_enhanced_features')
     features_dir.mkdir(parents=True, exist_ok=True)
 
     np.save(features_dir / 'X_train.npy', X_train)
@@ -125,11 +128,32 @@ def main():
     np.save(features_dir / 'X_test.npy', X_test)
     np.save(features_dir / 'y_test.npy', y_test)
 
-    print(f"  ✓ Features saved to: {features_dir}")
+    # Save feature info
+    feature_info = {
+        'extractor': 'MediaPipeEnhancedExtractor',
+        'dimension': 91,
+        'features': {
+            'normalized_landmarks': 60,
+            'finger_angles': 15,
+            'fingertip_palm_distances': 5,
+            'inter_finger_distances': 4,
+            'finger_openness': 5,
+            'orientation': 2
+        },
+        'train_samples': len(y_train),
+        'val_samples': len(y_val),
+        'test_samples': len(y_test)
+    }
+    with open(features_dir / 'feature_info.json', 'w') as f:
+        json.dump(feature_info, f, indent=2)
+
+    print(f"  -> Features saved to: {features_dir}")
 
     print("\n[5/5] Training Random Forest...")
     rf_model = RandomForestClassifier(
-        n_estimators=100,
+        n_estimators=200,
+        max_depth=20,
+        min_samples_split=5,
         random_state=42,
         n_jobs=-1
     )
@@ -150,16 +174,59 @@ def main():
     print(f"  Test Accuracy:  {test_acc:.2f}%")
     print(f"{'='*60}")
 
-    model_path = Path('models/rf_mediapipe.pkl')
+    # Detailed test results
+    print("\nTest Set Classification Report:")
+    class_names = ['rock', 'paper', 'scissors']
+    print(classification_report(y_test, test_pred, target_names=class_names))
+
+    print("Confusion Matrix:")
+    cm = confusion_matrix(y_test, test_pred)
+    print(f"            Predicted")
+    print(f"            Rock  Paper  Scissors")
+    for i, row in enumerate(cm):
+        print(f"  {class_names[i]:8s}  {row[0]:4d}  {row[1]:5d}  {row[2]:8d}")
+
+    # Feature importance (top 10)
+    print("\nTop 10 Most Important Features:")
+    feature_names = []
+    # Normalized landmarks (60)
+    for i in range(1, 21):
+        for coord in ['x', 'y', 'z']:
+            feature_names.append(f'landmark_{i}_{coord}')
+    # Finger angles (15)
+    for finger in ['thumb', 'index', 'middle', 'ring', 'pinky']:
+        for joint in ['mcp', 'pip', 'dip']:
+            feature_names.append(f'{finger}_{joint}_angle')
+    # Fingertip-palm distances (5)
+    for finger in ['thumb', 'index', 'middle', 'ring', 'pinky']:
+        feature_names.append(f'{finger}_palm_dist')
+    # Inter-finger distances (4)
+    feature_names.extend(['thumb_index_dist', 'index_middle_dist', 'middle_ring_dist', 'ring_pinky_dist'])
+    # Finger openness (5)
+    for finger in ['thumb', 'index', 'middle', 'ring', 'pinky']:
+        feature_names.append(f'{finger}_openness')
+    # Orientation (2)
+    feature_names.extend(['hand_roll', 'hand_pitch'])
+
+    importances = rf_model.feature_importances_
+    indices = np.argsort(importances)[::-1][:10]
+    for i, idx in enumerate(indices):
+        print(f"  {i+1}. {feature_names[idx]}: {importances[idx]:.4f}")
+
+    # Save model
+    model_path = Path('models/rf_mediapipe_enhanced.pkl')
     model_path.parent.mkdir(exist_ok=True)
 
     with open(model_path, 'wb') as f:
         pickle.dump(rf_model, f)
 
-    print(f"\n✓ Model saved to: {model_path}")
-    print(f"✓ Features available at: {features_dir}")
-    print(f"\nNext steps:")
-    print(f"  python scripts/train_mediapipe_dt.py  # Train faster Decision Tree")
+    print(f"\n{'='*60}")
+    print(f"Model saved to: {model_path}")
+    print(f"Features saved to: {features_dir}")
+    print(f"{'='*60}")
+
+    # Cleanup
+    extractor.close()
 
 
 if __name__ == '__main__':
