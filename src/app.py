@@ -20,16 +20,14 @@ from classification.mediapipe_rf_classifier import MediaPipeRFClassifier
 from classification.mediapipe_enhanced_rf_classifier import MediaPipeEnhancedRFClassifier
 from classification.rule_based_classifier import RuleBasedGestureClassifier
 from ui.main_interface import MainInterface
-from ui.styles.custom_css import get_custom_css
 from game import TwoPlayerGameWrapper
+from ui.styles.custom_css import get_custom_css
 import gradio as gr
-
 
 def main():
     pipeline = ProcessingPipeNetwork()
     interface = MainInterface(pipeline)
 
-    # Preprocessors
     interface.register_preprocessor("None", None)
     interface.register_preprocessor("Downscale (640px)", DownscalePreprocessor(max_size=640))
     interface.register_preprocessor("Downscale (480px)", DownscalePreprocessor(max_size=480))
@@ -85,8 +83,8 @@ def main():
         share=False,
         server_name="0.0.0.0",
         server_port=7860,
-        css=get_custom_css(),
-        theme=gr.themes.Soft()
+        theme=gr.themes.Soft(),
+        css=get_custom_css()
     )
 
 
