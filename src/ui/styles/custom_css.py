@@ -224,16 +224,10 @@ def get_custom_css():
     }
 
     .upload-container {
-    height: 10px !important;
     font-size: 4px !important;
     }
     
     .upload-container > .image-frame {
     height: 0px !important;
-    }
-
-    .upload-container > button > .wrap {
-    flex-direction: row !important;
-    height: 10px !important;
     }
     """
