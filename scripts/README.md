@@ -1,19 +1,40 @@
-# Dataset Management Scripts
+# Scripts
 
-Dataset letöltés, szervezés és split létrehozás scriptek.
+Python szkriptek dataset kezeléshez, model training-hez és teszteléshez.
+
+## Struktúra
+
+```
+scripts/
+├── data/              # Dataset kezelés
+│   ├── download_dataset.py
+│   ├── dataset_info.py
+│   └── create_splits.py
+├── training/          # Model training
+│   └── mediapipe/
+│       └── train_rf.py
+└── tests/             # Tesztek
+    └── mediapipe/
+        ├── test_model.py
+        └── ...
+```
+
+---
+
+# Dataset Management (data/)
 
 ## 📥 Dataset Letöltés
 
 ```bash
 # Elérhető források listázása
-python scripts/download_dataset.py --list
+venv/bin/python scripts/data/download_dataset.py --list
 
 # Letöltés Kaggle-ről
-python scripts/download_dataset.py --source kaggle-drgfreeman
-python scripts/download_dataset.py --source kaggle-sanikamal
+venv/bin/python scripts/data/download_dataset.py --source kaggle-drgfreeman
+venv/bin/python scripts/data/download_dataset.py --source kaggle-sanikamal
 
 # Custom output mappa
-python scripts/download_dataset.py --source kaggle-drgfreeman --output data/custom
+venv/bin/python scripts/data/download_dataset.py --source kaggle-drgfreeman --output data/custom
 ```
 
 **Elérhető források:**
@@ -24,23 +45,23 @@ python scripts/download_dataset.py --source kaggle-drgfreeman --output data/cust
 
 ```bash
 # Statisztikák: képszám, formátumok, osztály eloszlás
-python scripts/dataset_info.py
+venv/bin/python scripts/data/dataset_info.py
 
 # Custom mappa
-python scripts/dataset_info.py --data data/custom
+venv/bin/python scripts/data/dataset_info.py --data data/custom
 ```
 
 ## 🔀 Train/Val/Test Split
 
 ```bash
 # Alapértelmezett: 70% train, 10% val, 20% test
-python scripts/create_splits.py
+venv/bin/python scripts/data/create_splits.py
 
 # Custom arányok
-python scripts/create_splits.py --test-size 0.15 --val-size 0.15
+venv/bin/python scripts/data/create_splits.py --test-size 0.15 --val-size 0.15
 
 # Custom output
-python scripts/create_splits.py --output data/splits/custom_split.json
+venv/bin/python scripts/data/create_splits.py --output data/splits/custom_split.json
 ```
 
 **Output:** `data/splits/split_indices.json`
@@ -98,3 +119,43 @@ pip install kagglehub scikit-learn
 **Kaggle API config:** `~/.kaggle/kaggle.json`
 
 Letöltés: https://www.kaggle.com/settings → Create API Token
+
+---
+
+# Model Training (training/)
+
+## MediaPipe + Random Forest
+
+```bash
+# Train model (outputs: models/rf_mediapipe.pkl + features)
+venv/bin/python scripts/training/mediapipe/train_rf.py
+```
+
+**Output:**
+- `models/rf_mediapipe.pkl` - Trained Random Forest model
+- `data/mediapipe_features/*.npy` - Extracted features for reuse
+
+---
+
+# Testing (tests/)
+
+## MediaPipe Tests
+
+```bash
+# Model accuracy test
+venv/bin/python scripts/tests/mediapipe/test_model.py --num-samples 20
+
+# Full pipeline integration test
+venv/bin/python scripts/tests/mediapipe/test_integration.py
+
+# Check failed detections
+venv/bin/python scripts/tests/mediapipe/check_failed_images.py
+
+# Debug specific image
+venv/bin/python scripts/tests/mediapipe/debug_hand_detection.py data/raw/rock/rock_0001.png
+
+# Analyze detection issues
+venv/bin/python scripts/tests/mediapipe/visualize_detection_issue.py data/raw/rock/rock_0009.png
+```
+
+Részletek: `scripts/tests/mediapipe/README.md`
