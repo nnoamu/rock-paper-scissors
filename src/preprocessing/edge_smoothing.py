@@ -20,7 +20,6 @@ class EdgeSmoothingModule(PreprocessingModule):
         ksize=int(np.max(img.shape)/20)
         if ksize%2==0:
             ksize=ksize+1
-        print(ksize)
 
         for _ in range(20):
             img=cv2.GaussianBlur(img, (ksize, ksize), 0)
