@@ -88,6 +88,8 @@ def get_custom_css():
         font-weight: 700;
         font-size: 0.9rem;
         flex-shrink: 0;
+        margin-top: 0.5rem;
+        margin-left: 0.5rem;
     }
 
     .step-number.disabled {
@@ -178,7 +180,7 @@ def get_custom_css():
         font-size: 1.2rem !important;
         font-weight: 600 !important;
         text-align: center !important;
-        padding: 0.75rem !important;
+        padding: 1.25rem !important;
         background: var(--background-fill-secondary) !important;
         border-radius: 8px !important;
         color: var(--body-text-color) !important;
@@ -219,5 +221,13 @@ def get_custom_css():
         padding: 0.4rem 1rem !important;
         border-radius: 6px !important;
         transition: all 0.2s !important;
+    }
+
+    .upload-container {
+    font-size: 4px !important;
+    }
+    
+    .upload-container > .image-frame {
+    height: 0px !important;
     }
     """

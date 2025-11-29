@@ -41,9 +41,8 @@ class InputSection:
                     label="",
                     type="numpy",
                     sources=["upload", "webcam"],
-                    height=200,
-                    container=False,
-                    visible=True
+                    height=70,
+                    container=False
                 )
         return self.stream_image, self.upload_image, self.mode_selector
 

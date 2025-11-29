@@ -6,6 +6,9 @@ wheel>=0.38.0
 numpy>=1.24.0
 opencv-python>=4.8.0
 pillow>=10.0.0
+scipy>=1.15.3
+torch>=2.9.1
+
 
 # UI frameworks
 gradio>=4.0.0

@@ -71,7 +71,7 @@ class GameEvaluator:
                 player2_result=player2_result,
                 winner=None,
                 status='draw',
-                reason=f'Both players showed {p1_class}'
+                reason=f'Both players showed {p1_class.value}'
             )
 
         winner = self.RULES.get((p1_class, p2_class))
@@ -82,7 +82,7 @@ class GameEvaluator:
                 player2_result=player2_result,
                 winner=None,
                 status='invalid',
-                reason=f'Invalid game combination: {p1_class} vs {p2_class}'
+                reason=f'Invalid game combination: {p1_class.value} vs {p2_class.value}'
             )
 
         return GameResult(
