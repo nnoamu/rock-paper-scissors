@@ -310,37 +310,56 @@ class MainInterface:
 
             create_header()
 
-            with gr.Row(equal_height=True):
-                with gr.Column(scale=2):
-                    # Game mode selector
-                    with gr.Row():
-                        game_mode_dropdown = gr.Dropdown(
-                            choices=["Single Hand", "Two Player Game"],
-                            value="Single Hand",
-                            label="🎮 Mode",
-                            info="Single Hand: classify one gesture | Two Player Game: evaluate RPS match"
-                        )
-
-                    with gr.Row(equal_height=True):
-                        preproc_dropdown, feature_dropdown, classifier_dropdown = create_pipeline_steps_block(
-                            self.preprocessors,
-                            self.feature_extractors,
-                            self.classifiers
-                        )
-                        
-                        with gr.Row(equal_height=False):
-                            input_image = self.input_section.create()
-                            process_btn = self.controls_section.create()
-
-                with gr.Column(scale=1):
-                    class_out, conf_out = self.result_step.create()
-                    pipeline_out = self.pipeline_info.create()
-
             with gr.Row():
+                with gr.Column(scale=3):
+                    with gr.Tabs():
+                        with gr.Tab("Settings"):
+                            # Game mode selector
+                            with gr.Row():
+                                game_mode_dropdown = gr.Dropdown(
+                                    choices=["Single Hand", "Two Player Game"],
+                                    value="Single Hand",
+                                    label="🎮 Mode",
+                                    info="Single Hand: classify one gesture | Two Player Game: evaluate RPS match"
+                                )
+
+                            with gr.Row(equal_height=True):
+                                preproc_dropdown, feature_dropdown, classifier_dropdown = create_pipeline_steps_block(
+                                    self.preprocessors,
+                                    self.feature_extractors,
+                                    self.classifiers
+                                )
+                                
+                                with gr.Row(equal_height=False):
+                                    input_image = self.input_section.create()
+                                    process_btn = self.controls_section.create()
+
+                        with gr.Tab("Logs"):
+                            pipeline_out = self.pipeline_info.create()
+                            log_out = self.debug_log.create()
+
                 with gr.Column(scale=7):
                     output_image, display_radio = self.preview_section.create()
-                with gr.Column(scale=3):
-                    log_out = self.debug_log.create()
+                    
+                    with gr.Row():
+                        with gr.Column(scale=1):
+                            class_out = gr.Textbox(
+                                label="",
+                                value=self.result_step._current_class,
+                                container=False,
+                                interactive=False,
+                                elem_classes="class-output-inline"
+                            )
+                            self.result_step.class_component = class_out
+                        with gr.Column(scale=1):
+                            conf_out = gr.Textbox(
+                                label="",
+                                value=self.result_step._current_confidence,
+                                container=False,
+                                interactive=False,
+                                elem_classes="confidence-output-inline"
+                            )
+                            self.result_step.confidence_component = conf_out
 
             inputs = [
                 input_image,

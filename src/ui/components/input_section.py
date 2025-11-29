@@ -22,7 +22,7 @@ class InputSection:
                     label="",
                     type="numpy",
                     sources=["upload", "webcam"],
-                    height=200,
+                    height=70,
                     container=False
                 )
         return self.image_component

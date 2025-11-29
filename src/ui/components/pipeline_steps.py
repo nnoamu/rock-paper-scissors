@@ -110,6 +110,24 @@ class ResultStep:
                     )
         return self.class_component, self.confidence_component
 
+    def create_display_only(self):
+        """Create only the display components without the header, for use under image preview."""
+        self.class_component = gr.Textbox(
+            label="",
+            value=self._current_class,
+            container=False,
+            interactive=False,
+            elem_classes="class-output-inline"
+        )
+        self.confidence_component = gr.Textbox(
+            label="",
+            value=self._current_confidence,
+            container=False,
+            interactive=False,
+            elem_classes="confidence-output-inline"
+        )
+        return self.class_component, self.confidence_component
+
     def update(self, predicted_class: str, confidence: float):
         self._current_class = f"🎯 {predicted_class.upper()}"
         self._current_confidence = f"📊 {confidence:.1f}%"
