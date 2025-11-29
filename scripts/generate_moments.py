@@ -22,7 +22,7 @@ from src.classification import DummyClassifier
 
 import pandas as pd
 
-def process(inp, outp):
+def process(inp, outp, test_ratio, seed):
     pipe=ProcessingPipeNetwork()
 
     pipe.add_preprocessing(DownscaleModule(), 'downscale')
@@ -69,8 +69,8 @@ def process(inp, outp):
         print('finished processing', gesture_type, ':', fail, 'failed images')
     
     df=pd.DataFrame(data=df, columns=['features', 'label', 'test'])
-    df=df.sample(frac=1, random_state=42).reset_index(drop=True)
-    df.loc[round(len(df)*0.95):, 'test']=True
+    df=df.sample(frac=1, random_state=seed).reset_index(drop=True)
+    df.loc[round(len(df)*test_ratio):, 'test']=True
 
     print('processing done, saving data...')
     df.to_pickle(os.path.join(outp, 'hu_moments.pkl'))
@@ -81,7 +81,7 @@ def main():
         description='Generate Hu moments of train datasets.',
         epilog="""
 Example:
-  python scripts/generate_moments.py --src data/raw --dst data/processed
+  python scripts/generate_moments.py --src data/raw --dst data/processed --test_ratio=0.95 --seed=42
         """
     )
 
@@ -97,10 +97,24 @@ Example:
         help='Folder to put the results into'
     )
 
+    parser.add_argument(
+        '--test_ratio',
+        type=float,
+        default=0.95,
+        help='Ratio of samples to label as test samples'
+    )
+
+    parser.add_argument(
+        '--seed',
+        type=int,
+        default=42,
+        help='Random seed to use for test sample selection'
+    )
+
     args = parser.parse_args()
     if not args.src or not args.dst:
         raise Exception('Source and destination folders must be given')
-    process(args.src, args.dst)
+    process(args.src, args.dst, args.test_ratio, args.seed)
 
 if __name__ == '__main__':
     main()
