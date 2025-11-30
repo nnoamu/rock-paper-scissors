@@ -177,6 +177,7 @@ data/splits/**
 data/processed/**
 data/skincolor/**
 
+data/mediapipe_features/**
 !data/raw/.gitkeep
 !data/splits/.gitkeep
 !data/processed/.gitkeep
@@ -184,11 +185,11 @@ data/skincolor/**
 !data/README.md
 
 # Models - ignore contents, keep structure
-models/**
-!models/.gitkeep
+#models/**
+#!models/.gitkeep
 
 # Model and data files
-*.pkl
+#*.pkl
 *.npz
 *.h5
 

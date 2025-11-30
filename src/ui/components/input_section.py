@@ -10,7 +10,9 @@ from ui.utils import render
 
 class InputSection:
     def __init__(self):
-        self.image_component = None
+        self.stream_image = None
+        self.upload_image = None
+        self.mode_selector = None
         self.current_image: Optional[np.ndarray] = None
         self.image_history = []
 
@@ -18,14 +20,39 @@ class InputSection:
         with gr.Column(scale=1):
             with gr.Group(elem_classes="input-controls-section"):
                 gr.HTML(render('section_label.html', icon="📤", title="Image Input"))
-                self.image_component = gr.Image(
+                self.mode_selector = gr.Radio(
+                    choices=["Live Webcam", "Upload/Snapshot"],
+                    value="Upload/Snapshot",
+                    label="Input Mode",
+                    container=False
+                )
+                # Streaming webcam (for real-time)
+                self.stream_image = gr.Image(
+                    label="",
+                    type="numpy",
+                    sources=["webcam"],
+                    height=200,
+                    container=False,
+                    streaming=True,
+                    visible=False
+                )
+                # Upload or snapshot mode
+                self.upload_image = gr.Image(
                     label="",
                     type="numpy",
                     sources=["upload", "webcam"],
-                    height=70,
-                    container=False
+                    container=False,
+                    visible=True,
+                    height=70
                 )
-        return self.image_component
+        return self.stream_image, self.upload_image, self.mode_selector
+
+    def switch_mode(self, mode: str):
+        """Switch between streaming and upload mode."""
+        if mode == "Live Webcam":
+            return gr.update(visible=True), gr.update(visible=False)
+        else:
+            return gr.update(visible=False), gr.update(visible=True)
 
     def set_image(self, image: Optional[np.ndarray]):
         if image is not None:

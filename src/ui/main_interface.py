@@ -18,6 +18,7 @@ from ui.components import (
     PipelineInfo,
     DebugLog
 )
+from preprocessing import IdentityPreprocessor
 from game import TwoPlayerGameWrapper
 
 
@@ -77,7 +78,9 @@ class MainInterface:
             self.pipeline.add_preprocessing(self.preprocessors[preprocessing_name])
             self.debug_log.append(f"[Stage 1] Preprocessing: {preprocessing_name}")
         else:
-            self.debug_log.append(f"[Stage 1] Preprocessing: None")
+            # Always add Identity preprocessor to ensure preprocessing_order is not empty
+            self.pipeline.add_preprocessing(IdentityPreprocessor())
+            self.debug_log.append(f"[Stage 1] Preprocessing: None (Identity)")
 
         if feature_extractor_name not in self.feature_extractors:
             self.debug_log.append("[Stage 2] ERROR: No feature extractor selected")
@@ -88,7 +91,7 @@ class MainInterface:
                 self.debug_log.get_text()
             )
 
-        self.pipeline.set_feature_extractor(self.feature_extractors[feature_extractor_name])
+        self.pipeline.set_feature_extractor(self.feature_extractors[feature_extractor_name], name="feature_extractor")
         self.debug_log.append(f"[Stage 2] Feature Extractor: {feature_extractor_name}")
 
         if classifier_name not in self.classifiers:
@@ -203,7 +206,9 @@ class MainInterface:
             self.pipeline.add_preprocessing(self.preprocessors[preprocessing_name])
             self.debug_log.append(f"[Stage 1b] Additional Preprocessing: {preprocessing_name}")
         else:
-            self.debug_log.append(f"[Stage 1b] Additional Preprocessing: None")
+            # Always add Identity preprocessor to ensure preprocessing_order is not empty
+            self.pipeline.add_preprocessing(IdentityPreprocessor())
+            self.debug_log.append(f"[Stage 1b] Additional Preprocessing: None (Identity)")
 
         if feature_extractor_name not in self.feature_extractors:
             self.debug_log.append("[Stage 2] ERROR: No feature extractor selected")
@@ -214,7 +219,7 @@ class MainInterface:
                 self.debug_log.get_text()
             )
 
-        self.pipeline.set_feature_extractor(self.feature_extractors[feature_extractor_name])
+        self.pipeline.set_feature_extractor(self.feature_extractors[feature_extractor_name], name="feature_extractor")
         self.debug_log.append(f"[Stage 2] Feature Extractor: {feature_extractor_name}")
 
         if classifier_name not in self.classifiers:
@@ -305,7 +310,7 @@ class MainInterface:
 
     def create_interface(self) -> gr.Blocks:
         with gr.Blocks(
-            title="Rock-Paper-Scissors",
+            title="Rock-Paper-Scissors"
         ) as demo:
 
             create_header()
@@ -329,9 +334,9 @@ class MainInterface:
                                     self.feature_extractors,
                                     self.classifiers
                                 )
-                                
+
                                 with gr.Row(equal_height=False):
-                                    input_image = self.input_section.create()
+                                    stream_image, upload_image, input_mode = self.input_section.create()
                                     process_btn = self.controls_section.create()
 
                         with gr.Tab("Logs"):
@@ -340,7 +345,7 @@ class MainInterface:
 
                 with gr.Column(scale=7):
                     output_image, display_radio = self.preview_section.create()
-                    
+
                     with gr.Row():
                         with gr.Column(scale=1):
                             class_out = gr.Textbox(
@@ -361,8 +366,8 @@ class MainInterface:
                             )
                             self.result_step.confidence_component = conf_out
 
-            inputs = [
-                input_image,
+            # Common inputs (image will be added dynamically)
+            common_inputs = [
                 preproc_dropdown,
                 feature_dropdown,
                 classifier_dropdown,
@@ -371,12 +376,30 @@ class MainInterface:
             ]
             outputs = [output_image, class_out, conf_out, pipeline_out, log_out]
 
-            input_image.change(fn=self.process_image, inputs=inputs, outputs=outputs)
-            process_btn.click(fn=self.process_image, inputs=inputs, outputs=outputs)
-            preproc_dropdown.change(fn=self.process_image, inputs=inputs, outputs=outputs)
-            feature_dropdown.change(fn=self.process_image, inputs=inputs, outputs=outputs)
-            classifier_dropdown.change(fn=self.process_image, inputs=inputs, outputs=outputs)
-            display_radio.change(fn=self.process_image, inputs=inputs, outputs=outputs)
-            game_mode_dropdown.change(fn=self.process_image, inputs=inputs, outputs=outputs)
+            # Stream inputs (for live webcam)
+            stream_inputs = [stream_image] + common_inputs
+            # Upload inputs (for upload/snapshot)
+            upload_inputs = [upload_image] + common_inputs
+
+            # Mode switching
+            input_mode.change(
+                fn=self.input_section.switch_mode,
+                inputs=[input_mode],
+                outputs=[stream_image, upload_image]
+            )
+
+            # Stream for real-time webcam processing
+            stream_image.stream(fn=self.process_image, inputs=stream_inputs, outputs=outputs)
+
+            # Upload/snapshot mode events
+            upload_image.change(fn=self.process_image, inputs=upload_inputs, outputs=outputs)
+            process_btn.click(fn=self.process_image, inputs=upload_inputs, outputs=outputs)
+
+            # Dropdown changes (use upload_image as default, stream handles itself)
+            preproc_dropdown.change(fn=self.process_image, inputs=upload_inputs, outputs=outputs)
+            feature_dropdown.change(fn=self.process_image, inputs=upload_inputs, outputs=outputs)
+            classifier_dropdown.change(fn=self.process_image, inputs=upload_inputs, outputs=outputs)
+            display_radio.change(fn=self.process_image, inputs=upload_inputs, outputs=outputs)
+            game_mode_dropdown.change(fn=self.process_image, inputs=upload_inputs, outputs=outputs)
 
         return demo

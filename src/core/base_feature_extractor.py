@@ -39,7 +39,7 @@ class BaseFeatureExtractor(BaseModule):
     @final
     def extract(self, preprocessed_image: DataObject | List[DataObject]) -> FeatureVector | List[FeatureVector]:
         result=self.process(preprocessed_image)
-        if (not isinstance(result, FeatureVector)) and ((not isinstance(result, list)) or not isinstance(result[0], FeatureVector)):
+        if (not isinstance(result, FeatureVector)) and ((not isinstance(result, list)) or (len(result)>0 and not isinstance(result[0], FeatureVector))):
             raise Exception("Error in "+self.name+": Output type is not FeatureVector or List[FeatureVector]")
         return cast(FeatureVector | List[FeatureVector], result)
 
