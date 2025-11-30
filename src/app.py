@@ -75,10 +75,10 @@ def main():
     # Classifiers
     interface.register_classifier("Simple Dummy", DummyClassifier())
     interface.register_classifier("Rule-Based (No Training)", RuleBasedGestureClassifier())
-    """interface.register_classifier("K nearest classifier", KMeansClassifier(k=5, data_path=[
+    interface.register_classifier("K nearest classifier", KMeansClassifier(k=5, data_path=[
         'data/processed/drgfreeman/hu_moments.pkl', 
         'data/processed/hectorandac/hu_moments.pkl'
-        ]))"""
+        ]))
 
     # 63D classifier
     try:
