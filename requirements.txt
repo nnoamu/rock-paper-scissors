@@ -1,12 +1,16 @@
-# Build tools
-setuptools>=65.0.0
-wheel>=0.38.0
-
 # Core dependencies
-numpy>=1.24.0
-opencv-python>=4.8.0
-pillow>=10.0.0
+numpy>=1.26.4,<2.0.0
+opencv-contrib-python==4.11.0.86
+opencv-python>=4.11.0.86
+pillow>=10.4.0
+scipy>=1.15.3
+torch>=2.0.0,<2.6.0
+mediapipe>=0.10.21
+pydantic==2.12.4
+pydantic_core==2.41.5
+scikit-learn==1.7.2
 
 # UI frameworks
-gradio>=4.0.0
+gradio==6.0.1
+huggingface_hub>=0.26.0,<1.0.0
 jinja2>=3.1.0
