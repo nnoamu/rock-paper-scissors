@@ -198,7 +198,7 @@ data/mediapipe_features/**
 #*.pkl
 *.npz
 *.h5
-*.pth
+#*.pth
 
 # I like testing stuff here and I don't wanna delete it every time :D (Gergo)
 src/test.py
