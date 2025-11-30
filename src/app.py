@@ -84,7 +84,8 @@ def main():
         server_name="0.0.0.0",
         server_port=7860,
         theme=gr.themes.Soft(),
-        css=get_custom_css()
+        css=get_custom_css(),
+        ssr_mode=False
     )
 
 
