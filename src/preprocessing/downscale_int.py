@@ -8,7 +8,7 @@ from core.base_processor import PreprocessingModule
 from core import DataObject
 
 
-class DownscalePreprocessor(PreprocessingModule):
+class DownscaleWithInterpolationPreprocessor(PreprocessingModule):
     """
     Downscales images to a maximum dimension while preserving aspect ratio.
 
@@ -18,7 +18,7 @@ class DownscalePreprocessor(PreprocessingModule):
     """
 
     def __init__(self, max_size: int = 640, interpolation: int = cv2.INTER_AREA):
-        super().__init__(name=f"Downscale({max_size})")
+        super().__init__(name=f"Downscale with interpolation({max_size})")
         self.max_size = max_size
         self.interpolation = interpolation
 
