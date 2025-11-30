@@ -82,9 +82,9 @@ class ProcessingPipeNetwork:
 
     def clear_preprocessing(self):
         for name in self.preprocessing_order:
-            self.preprocessing_modules.pop(name)
+            self.preprocessing_modules.pop(name, None)
             self.dependencies.pop(name)
-            self.preprocessing_outputs.pop(name)
+            self.preprocessing_outputs.pop(name, None)
         self.preprocessing_order.clear()
     
     def __combine_input_objects(self, inputs: List[str]) -> DataObject | List[DataObject]:
