@@ -5,7 +5,7 @@ UI komponensek a ui.components modulból töltődnek
 
 import gradio as gr
 import numpy as np
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 from ui.styles import get_custom_css
 from ui.components import (
@@ -33,6 +33,7 @@ class MainInterface:
         self.pipeline = pipeline
         self.game_wrapper: Optional[TwoPlayerGameWrapper] = None
         self.preprocessors: Dict[str, Optional[object]] = {}
+        self.preprocessor_dependencies: Dict[str, Optional[List[str]]] = {}
         self.feature_extractors: Dict[str, Optional[object]] = {}
         self.classifiers: Dict[str, Optional[object]] = {}
         self.current_image = None
@@ -50,8 +51,10 @@ class MainInterface:
     def set_game_wrapper(self, game_wrapper: TwoPlayerGameWrapper):
         self.game_wrapper = game_wrapper
 
-    def register_preprocessor(self, name: str, module):
+    def register_preprocessor(self, name: str, module, deps: Optional[List[str]]=None):
         self.preprocessors[name] = module
+        if module is not None:
+            self.preprocessor_dependencies[module.name]=deps
 
     def register_feature_extractor(self, name: str, extractor):
         self.feature_extractors[name] = extractor
@@ -89,7 +92,7 @@ class MainInterface:
         self.pipeline.clear_preprocessing()
         if modules:
             for i, module in enumerate(modules):
-                self.pipeline.add_preprocessing(module)
+                self.pipeline.add_preprocessing(module, deps=None if module is None else self.preprocessor_dependencies[module.name])
                 self.debug_log.append(f"[Stage 1.{i+1}] Preprocessing: {module.name}")
         else:
             # No preprocessing steps - use None to ensure pipeline works
