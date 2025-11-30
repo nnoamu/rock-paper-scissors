@@ -6,12 +6,13 @@ from typing import Dict, Any, Optional
 from .base_processor import PreprocessingModule
 from preprocessing import (
     IdentityPreprocessor,
-    DownscalePreprocessor,
+    DownscaleModule,
     GrayscaleConverter,
     ChannelSplitter,
     GaussianBlurModule,
     EdgeDetectorModule,
-    SkinColorSegmenterModule
+    SkinColorSegmenterModule,
+    DownscaleWithInterpolationPreprocessor
 )
 
 
@@ -32,9 +33,13 @@ def create_preprocessing_module(step_type: str, parameters: Dict[str, Any] = Non
     if step_type == "None":
         return IdentityPreprocessor()
     elif step_type == "Downscale (640px)":
-        return DownscalePreprocessor(max_size=640)
+        return DownscaleModule(max_dimension_length=640)
     elif step_type == "Downscale (480px)":
-        return DownscalePreprocessor(max_size=480)
+        return DownscaleModule(max_dimension_length=480)
+    elif step_type == "Downscale with interpolation (640px)":
+        return DownscaleWithInterpolationPreprocessor(max_size=640)
+    elif step_type == "Downscale with interpolation (480px)":
+        return DownscaleWithInterpolationPreprocessor(max_size=480)
     elif step_type == "Grayscale":
         return GrayscaleConverter()
     elif step_type == "Split":
@@ -47,8 +52,8 @@ def create_preprocessing_module(step_type: str, parameters: Dict[str, Any] = Non
             upper_thresh=int(parameters.get("upper_thresh", 40))
         )
     elif step_type == "Downscale":
-        return DownscalePreprocessor(
-            max_size=parameters.get("max_size", 640)
+        return DownscaleModule(
+            max_dimension_length=parameters.get("max_dimension_length", 640)
         )
     elif step_type == "ChannelSplitter":
         return ChannelSplitter()
@@ -79,6 +84,8 @@ def get_preprocessing_type_names() -> Dict[str, str]:
         "None": "None",
         "Downscale (640px)": "Downscale (640px)",
         "Downscale (480px)": "Downscale (480px)",
+        "Downscale with interpolation (640px)": "Downscale with interpolation (640px)",
+        "Downscale with interpolation (480px)": "Downscale with interpolation (480px)",
         "Grayscale": "Grayscale",
         "Split": "Split",
         "Blur": "Blur",

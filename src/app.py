@@ -11,7 +11,7 @@ sys.path.insert(0, str(src_path))
 from core.pipe_network import ProcessingPipeNetwork
 from preprocessing.grayscale import GrayscaleConverter
 from preprocessing.channel_splitter import ChannelSplitter
-from preprocessing import SkinColorSegmenterModule, GaussianBlurModule, EdgeDetectorModule, DownscalePreprocessor
+from preprocessing import SkinColorSegmenterModule, GaussianBlurModule, EdgeDetectorModule, DownscaleWithInterpolationPreprocessor
 from feature_extraction.dummy_geometric_extractor import DummyGeometricExtractor
 from feature_extraction.mediapipe_hand_extractor import MediaPipeHandExtractor
 from feature_extraction.mediapipe_enhanced_extractor import MediaPipeEnhancedExtractor
@@ -29,8 +29,8 @@ def main():
     interface = MainInterface(pipeline)
 
     interface.register_preprocessor("None", None)
-    interface.register_preprocessor("Downscale (640px)", DownscalePreprocessor(max_size=640))
-    interface.register_preprocessor("Downscale (480px)", DownscalePreprocessor(max_size=480))
+    interface.register_preprocessor("Downscale (640px)", DownscaleWithInterpolationPreprocessor(max_size=640))
+    interface.register_preprocessor("Downscale (480px)", DownscaleWithInterpolationPreprocessor(max_size=480))
     interface.register_preprocessor("Grayscale", GrayscaleConverter())
     interface.register_preprocessor("Split", ChannelSplitter())
 

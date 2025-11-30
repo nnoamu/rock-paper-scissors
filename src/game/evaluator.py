@@ -1,31 +1,46 @@
-from typing import Dict, Tuple
+from typing import Optional
 
 from core.classification_result import ClassificationResult
 from .game_result import GameResult
 
 
 class GameEvaluator:
-    """Kő-papír-olló játék kiértékelése két játékos között."""
 
-    RULES: Dict[Tuple[str, str], str] = {
-        ('ROCK', 'SCISSORS'): 'player1',
-        ('SCISSORS', 'PAPER'): 'player1',
-        ('PAPER', 'ROCK'): 'player1',
-        ('SCISSORS', 'ROCK'): 'player2',
-        ('PAPER', 'SCISSORS'): 'player2',
-        ('ROCK', 'PAPER'): 'player2',
-    }
-
-    def __init__(self, min_confidence: float = 0.7):
+    def __init__(self, min_confidence: float = 0.4):
         self.min_confidence = min_confidence
 
+    def _determine_winner(self, player1_gesture: str, player2_gesture: str) -> Optional[str]:
+        p1 = player1_gesture.upper()
+        p2 = player2_gesture.upper()
+
+        if p1 == p2:
+            return None
+
+        if p1 == 'ROCK' and p2 == 'SCISSORS':
+            return 'player1'
+        if p1 == 'SCISSORS' and p2 == 'PAPER':
+            return 'player1'
+        if p1 == 'PAPER' and p2 == 'ROCK':
+            return 'player1'
+
+        return 'player2'
+
+    def _get_gesture_string(self, classification_result: ClassificationResult) -> str:
+        gesture = classification_result.predicted_class
+
+        if hasattr(gesture, 'value'):
+            return str(gesture.value).upper()
+        elif hasattr(gesture, 'name'):
+            return str(gesture.name).upper()
+        else:
+            return str(gesture).upper()
+
     def evaluate(
-        self,
-        player1_result: ClassificationResult,
-        player2_result: ClassificationResult
+            self,
+            player1_result: ClassificationResult,
+            player2_result: ClassificationResult
     ) -> GameResult:
-        p1_class = player1_result.predicted_class
-        p2_class = player2_result.predicted_class
+
         p1_conf = player1_result.confidence
         p2_conf = player2_result.confidence
 
@@ -47,7 +62,10 @@ class GameEvaluator:
                 reason=f'Low confidence for Player 2 ({p2_conf:.2f} < {self.min_confidence})'
             )
 
-        if p1_class == 'UNKNOWN':
+        p1_gesture = self._get_gesture_string(player1_result)
+        p2_gesture = self._get_gesture_string(player2_result)
+
+        if p1_gesture == 'UNKNOWN':
             return GameResult(
                 player1_result=player1_result,
                 player2_result=player2_result,
@@ -56,7 +74,7 @@ class GameEvaluator:
                 reason='Unknown gesture from Player 1'
             )
 
-        if p2_class == 'UNKNOWN':
+        if p2_gesture == 'UNKNOWN':
             return GameResult(
                 player1_result=player1_result,
                 player2_result=player2_result,
@@ -65,24 +83,17 @@ class GameEvaluator:
                 reason='Unknown gesture from Player 2'
             )
 
-        if p1_class == p2_class:
-            return GameResult(
-                player1_result=player1_result,
-                player2_result=player2_result,
-                winner=None,
-                status='draw',
-                reason=f'Both players showed {p1_class.value}'
-            )
+        print(f"DEBUG: Player 1 = {p1_gesture}, Player 2 = {p2_gesture}")
 
-        winner = self.RULES.get((p1_class, p2_class))
+        winner = self._determine_winner(p1_gesture, p2_gesture)
 
         if winner is None:
             return GameResult(
                 player1_result=player1_result,
                 player2_result=player2_result,
                 winner=None,
-                status='invalid',
-                reason=f'Invalid game combination: {p1_class.value} vs {p2_class.value}'
+                status='draw',
+                reason=f'Both players showed {p1_gesture}'
             )
 
         return GameResult(

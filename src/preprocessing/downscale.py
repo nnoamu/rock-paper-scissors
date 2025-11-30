@@ -1,48 +1,29 @@
 """
-Downscale preprocessor - resizes image to smaller resolution for faster processing.
+Grayscale konverzió modul.
+Színes képet szürkeskálássá alakít. 1 csatornás képet ad vissza.
+(Base Modulból származtatott modul minta implementáció.)
 """
 
 import cv2
-import numpy as np
-from core.base_processor import PreprocessingModule
-from core import DataObject
+from core import PreprocessingModule, DataObject
 
 
-class DownscalePreprocessor(PreprocessingModule):
-    """
-    Downscales images to a maximum dimension while preserving aspect ratio.
+class DownscaleModule(PreprocessingModule):
 
-    Args:
-        max_size: Maximum width or height in pixels (default 640)
-        interpolation: OpenCV interpolation method (default INTER_AREA for downscaling)
-    """
-
-    def __init__(self, max_size: int = 640, interpolation: int = cv2.INTER_AREA):
-        super().__init__(name=f"Downscale({max_size})")
-        self.max_size = max_size
-        self.interpolation = interpolation
+    def __init__(self, max_dimension_length=300):
+        super().__init__(name="Downscale")
+        self.max_image_size=max_dimension_length
 
     def _process(self, input: DataObject) -> DataObject:
-        image = input.data
+        img=input.data
+        shape=input.shape[:2]
+        mx=max(shape)
 
-        if len(image.shape) == 2:
-            h, w = image.shape
-        else:
-            h, w = image.shape[:2]
+        if mx>self.max_image_size:
+            tg=self.max_image_size
+            r=tg/mx
+            new_w=round(shape[0]*r)
+            new_h=round(shape[1]*r)
+            img=cv2.resize(img, (new_w, new_h))
 
-        # Check if downscaling is needed
-        if max(h, w) <= self.max_size:
-            return DataObject(image.copy())
-
-        # Calculate new dimensions preserving aspect ratio
-        if w > h:
-            new_w = self.max_size
-            new_h = int(h * (self.max_size / w))
-        else:
-            new_h = self.max_size
-            new_w = int(w * (self.max_size / h))
-
-        # Resize
-        resized = cv2.resize(image, (new_w, new_h), interpolation=self.interpolation)
-
-        return DataObject(resized)
+        return DataObject(img)
