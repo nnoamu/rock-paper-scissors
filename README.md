@@ -1,3 +1,13 @@
+---
+title: Rock-Paper-Scissors CV Recognizer
+emoji: 🖼️
+colorFrom: blue
+colorTo: purple
+sdk: gradio
+sdk_version: 6.0.1
+app_file: src/app.py
+pinned: false
+---
 # Rock-Paper-Scissors CV Recognizer
 
 Kő-papír-olló gesztusfelismerő rendszer számítógépes látással.
