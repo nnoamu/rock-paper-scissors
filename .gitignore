@@ -185,11 +185,11 @@ data/mediapipe_features/**
 !data/README.md
 
 # Models - ignore contents, keep structure
-models/**
-!models/.gitkeep
+#models/**
+#!models/.gitkeep
 
 # Model and data files
-*.pkl
+#*.pkl
 *.npz
 *.h5
 
