@@ -3,8 +3,7 @@ title: Rock-Paper-Scissors CV Recognizer
 emoji: 🖼️
 colorFrom: blue
 colorTo: purple
-sdk: gradio
-sdk_version: 6.0.1
+sdk: docker
 app_file: src/app.py
 pinned: false
 ---
