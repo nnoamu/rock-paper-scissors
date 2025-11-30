@@ -16,7 +16,7 @@ class GameEvaluator:
         ('ROCK', 'PAPER'): 'player2',
     }
 
-    def __init__(self, min_confidence: float = 0.7):
+    def __init__(self, min_confidence: float = 0.4):
         self.min_confidence = min_confidence
 
     def evaluate(
