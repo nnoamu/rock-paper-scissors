@@ -73,7 +73,7 @@ def main():
     except FileNotFoundError:
         print("Warning: MediaPipe RF 91D model not found.")
 
-    game_wrapper = TwoPlayerGameWrapper(pipeline, min_confidence=0.7)
+    game_wrapper = TwoPlayerGameWrapper(pipeline, min_confidence=0.4)
     interface.set_game_wrapper(game_wrapper)
     print("✅ Two-player game mode enabled")
 
