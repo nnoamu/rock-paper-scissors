@@ -5,15 +5,12 @@ UI komponensek a ui.components modulból töltődnek
 
 import gradio as gr
 import numpy as np
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 from ui.styles import get_custom_css
 from ui.components import (
     create_header,
-    create_pipeline_arrow,
-    create_step_1,
-    create_step_2,
-    create_step_3,
+    create_pipeline_steps_block,
     ResultStep,
     InputSection,
     ControlsSection,
@@ -23,6 +20,11 @@ from ui.components import (
 )
 from preprocessing import IdentityPreprocessor
 from game import TwoPlayerGameWrapper
+from core.preprocessing_pipeline import PreprocessingPipeline
+from core.preprocessing_factory import create_preprocessing_module
+from ui.components.preprocessing_pipeline_ui import (
+    add_step_handler, reset_handler, render_pipeline_steps_html
+)
 
 
 class MainInterface:
@@ -31,6 +33,7 @@ class MainInterface:
         self.pipeline = pipeline
         self.game_wrapper: Optional[TwoPlayerGameWrapper] = None
         self.preprocessors: Dict[str, Optional[object]] = {}
+        self.preprocessor_dependencies: Dict[str, Optional[List[str]]] = {}
         self.feature_extractors: Dict[str, Optional[object]] = {}
         self.classifiers: Dict[str, Optional[object]] = {}
         self.current_image = None
@@ -48,8 +51,10 @@ class MainInterface:
     def set_game_wrapper(self, game_wrapper: TwoPlayerGameWrapper):
         self.game_wrapper = game_wrapper
 
-    def register_preprocessor(self, name: str, module):
+    def register_preprocessor(self, name: str, module, deps: Optional[List[str]]=None):
         self.preprocessors[name] = module
+        if module is not None:
+            self.preprocessor_dependencies[module.name]=deps
 
     def register_feature_extractor(self, name: str, extractor):
         self.feature_extractors[name] = extractor
@@ -57,7 +62,7 @@ class MainInterface:
     def register_classifier(self, name: str, classifier):
         self.classifiers[name] = classifier
 
-    def process_image(self, image, preprocessing_name: str,
+    def process_image(self, image, preprocessing_pipeline_state: str,
                       feature_extractor_name: str, classifier_name: str,
                       display_mode: str, game_mode: str = "Single Hand"):
         if image is None:
@@ -69,21 +74,30 @@ class MainInterface:
             )
 
         if game_mode == "Two Player Game":
-            return self._process_game_mode(image, preprocessing_name,
+            return self._process_game_mode(image, preprocessing_pipeline_state,
                                           feature_extractor_name, classifier_name,
                                           display_mode)
 
         self.current_image = image
         self.debug_log.clear()
 
+        # Load preprocessing pipeline from state
+        preprocessing_pipeline = PreprocessingPipeline(step_factory=create_preprocessing_module)
+        if preprocessing_pipeline_state:
+            preprocessing_pipeline.from_json(preprocessing_pipeline_state)
+        
+        # Build modules from pipeline
+        modules = preprocessing_pipeline.build_modules()
+        
         self.pipeline.clear_preprocessing()
-        if preprocessing_name in self.preprocessors and self.preprocessors[preprocessing_name] is not None:
-            self.pipeline.add_preprocessing(self.preprocessors[preprocessing_name])
-            self.debug_log.append(f"[Stage 1] Preprocessing: {preprocessing_name}")
+        if modules:
+            for i, module in enumerate(modules):
+                self.pipeline.add_preprocessing(module, deps=None if module is None else self.preprocessor_dependencies[module.name])
+                self.debug_log.append(f"[Stage 1.{i+1}] Preprocessing: {module.name}")
         else:
-            # Always add Identity preprocessor to ensure preprocessing_order is not empty
+            # No preprocessing steps - use None to ensure pipeline works
             self.pipeline.add_preprocessing(IdentityPreprocessor())
-            self.debug_log.append(f"[Stage 1] Preprocessing: None (Identity)")
+            self.debug_log.append(f"[Stage 1] Preprocessing: None")
 
         if feature_extractor_name not in self.feature_extractors:
             self.debug_log.append("[Stage 2] ERROR: No feature extractor selected")
@@ -181,7 +195,7 @@ class MainInterface:
             self.debug_log.get_text()
         )
 
-    def _process_game_mode(self, image, preprocessing_name: str,
+    def _process_game_mode(self, image, preprocessing_pipeline_state: str,
                            feature_extractor_name: str, classifier_name: str,
                            display_mode: str):
         """Process image in two-player game mode."""
@@ -205,13 +219,21 @@ class MainInterface:
         self.pipeline.add_preprocessing(ImageSplitterModule())
         self.debug_log.append(f"[Stage 1a] Image Splitter: Split image for 2-player batch mode")
 
-        if preprocessing_name in self.preprocessors and self.preprocessors[preprocessing_name] is not None:
-            self.pipeline.add_preprocessing(self.preprocessors[preprocessing_name])
-            self.debug_log.append(f"[Stage 1b] Additional Preprocessing: {preprocessing_name}")
+        # Load preprocessing pipeline from state
+        preprocessing_pipeline = PreprocessingPipeline(step_factory=create_preprocessing_module)
+        if preprocessing_pipeline_state:
+            preprocessing_pipeline.from_json(preprocessing_pipeline_state)
+        
+        # Build modules from pipeline
+        modules = preprocessing_pipeline.build_modules()
+        if modules:
+            for i, module in enumerate(modules):
+                self.pipeline.add_preprocessing(module)
+                self.debug_log.append(f"[Stage 1b.{i+1}] Additional Preprocessing: {module.name}")
         else:
-            # Always add Identity preprocessor to ensure preprocessing_order is not empty
+            # No preprocessing steps - use None to ensure pipeline works
             self.pipeline.add_preprocessing(IdentityPreprocessor())
-            self.debug_log.append(f"[Stage 1b] Additional Preprocessing: None (Identity)")
+            self.debug_log.append(f"[Stage 1b] Additional Preprocessing: None")
 
         if feature_extractor_name not in self.feature_extractors:
             self.debug_log.append("[Stage 2] ERROR: No feature extractor selected")
@@ -319,39 +341,62 @@ class MainInterface:
             create_header()
 
             with gr.Row():
-                with gr.Column(scale=2):
-                    # Game mode selector
-                    with gr.Row():
-                        game_mode_dropdown = gr.Dropdown(
-                            choices=["Single Hand", "Two Player Game"],
-                            value="Single Hand",
-                            label="🎮 Mode",
-                            info="Single Hand: classify one gesture | Two Player Game: evaluate RPS match"
-                        )
+                with gr.Column(scale=3):
+                    with gr.Tabs():
+                        with gr.Tab("Settings"):
+                            # Game mode selector
+                            with gr.Row():
+                                game_mode_dropdown = gr.Dropdown(
+                                    choices=["Single Hand", "Two Player Game"],
+                                    value="Single Hand",
+                                    label="🎮 Mode",
+                                    info="Single Hand: classify one gesture | Two Player Game: evaluate RPS match"
+                                )
+
+                            with gr.Row(equal_height=True):
+                                (preproc_pipeline_state, feature_dropdown, classifier_dropdown,
+                                 preproc_steps_container, preproc_add_dropdown, preproc_add_btn,
+                                 preproc_reset_btn) = create_pipeline_steps_block(
+                                    self.preprocessors,
+                                    self.feature_extractors,
+                                    self.classifiers,
+                                    step_factory=create_preprocessing_module
+                                )
+                                with gr.Row(equal_height=False):
+                                    stream_image, upload_image, input_mode = self.input_section.create()
+                                    process_btn = self.controls_section.create()
+                        with gr.Tab("Logs"):
+                            pipeline_out = self.pipeline_info.create()
+                            log_out = self.debug_log.create()
+
+                with gr.Column(scale=7):
+                    output_image, display_radio = self.preview_section.create()
 
                     with gr.Row():
-                        preproc_dropdown = create_step_1(self.preprocessors)
-                        create_pipeline_arrow()
-                        feature_dropdown = create_step_2(self.feature_extractors)
-                        create_pipeline_arrow()
-                        classifier_dropdown = create_step_3(self.classifiers)
-                        create_pipeline_arrow()
-
-                    with gr.Row():
-                        stream_image, upload_image, input_mode = self.input_section.create()
-                        process_btn = self.controls_section.create()
-
-                with gr.Column(scale=1):
-                    class_out, conf_out = self.result_step.create()
-                    pipeline_out = self.pipeline_info.create()
-                    log_out = self.debug_log.create()
-
-            with gr.Row():
-                output_image, display_radio = self.preview_section.create()
+                        with gr.Column(scale=1):
+                            class_out = gr.Textbox(
+                                label="",
+                                value=self.result_step._current_class,
+                                container=False,
+                                interactive=False,
+                                elem_classes="class-output-inline",
+                                lines=4
+                            )
+                            self.result_step.class_component = class_out
+                        with gr.Column(scale=1):
+                            conf_out = gr.Textbox(
+                                label="",
+                                value=self.result_step._current_confidence,
+                                container=False,
+                                interactive=False,
+                                elem_classes="confidence-output-inline",
+                                lines=4
+                            )
+                            self.result_step.confidence_component = conf_out
 
             # Common inputs (image will be added dynamically)
             common_inputs = [
-                preproc_dropdown,
+                preproc_pipeline_state,
                 feature_dropdown,
                 classifier_dropdown,
                 display_radio,
@@ -378,11 +423,34 @@ class MainInterface:
             upload_image.change(fn=self.process_image, inputs=upload_inputs, outputs=outputs)
             process_btn.click(fn=self.process_image, inputs=upload_inputs, outputs=outputs)
 
-            # Dropdown changes (use upload_image as default, stream handles itself)
-            preproc_dropdown.change(fn=self.process_image, inputs=upload_inputs, outputs=outputs)
+            # Pipeline state changes (use upload_image as default, stream handles itself)
+            preproc_pipeline_state.change(fn=self.process_image, inputs=upload_inputs, outputs=outputs)
             feature_dropdown.change(fn=self.process_image, inputs=upload_inputs, outputs=outputs)
             classifier_dropdown.change(fn=self.process_image, inputs=upload_inputs, outputs=outputs)
             display_radio.change(fn=self.process_image, inputs=upload_inputs, outputs=outputs)
             game_mode_dropdown.change(fn=self.process_image, inputs=upload_inputs, outputs=outputs)
+            
+            # Preprocessing pipeline UI handlers
+            def add_step_wrapper(step_type, current_state):
+                new_state, html = add_step_handler(step_type, current_state, self.preprocessors, create_preprocessing_module)
+                return new_state, html
+            
+            def reset_wrapper(current_state):
+                new_state, html = reset_handler(current_state, create_preprocessing_module)
+                return new_state, html
+            
+            
+            # Connect pipeline UI events
+            preproc_add_btn.click(
+                fn=add_step_wrapper,
+                inputs=[preproc_add_dropdown, preproc_pipeline_state],
+                outputs=[preproc_pipeline_state, preproc_steps_container]
+            )
+            
+            preproc_reset_btn.click(
+                fn=reset_wrapper,
+                inputs=[preproc_pipeline_state],
+                outputs=[preproc_pipeline_state, preproc_steps_container]
+            )
 
         return demo

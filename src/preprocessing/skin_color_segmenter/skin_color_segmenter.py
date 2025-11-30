@@ -22,11 +22,12 @@ class SkinColorSegmenterModule(PreprocessingModule):
         config=ConfigParser()
         config_file=Path(model_path).joinpath('config.txt')
         if len(config.read([config_file]))==0:
+            print("OOF")
             raise Exception("model config file not found")
         
         self.device='cuda' if torch.cuda.is_available() else 'cpu'
         self.model=SkinColorSegmenterNetwork(num_layers=int(config["NETWORK"]["num_layers"]), layer_density=int(config["NETWORK"]["layer_density"]))
-        self.model.load_state_dict(torch.load(Path(model_path).joinpath('model.pth'), weights_only=True), assign=True)
+        self.model.load_state_dict(torch.load(Path(model_path).joinpath('model.pth'), map_location=self.device, weights_only=True), assign=True)
         self.model.to(self.device)
         self.model.eval()
 

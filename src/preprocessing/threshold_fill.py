@@ -32,7 +32,7 @@ class ThresholdFillModule(PreprocessingModule):
         max_intensity=np.max(img)
 
         current=255*np.array(img>max_intensity*self.upper_thresh, dtype=np.uint8)
-        fillable=np.array(img>max_intensity*self.lower_thresh, dtype=np.bool)
+        fillable=np.array(img>max_intensity*self.lower_thresh, dtype=np.uint8)
 
         change=True
         structuring_element=cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
