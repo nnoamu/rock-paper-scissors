@@ -36,7 +36,7 @@ class BaseClassifier(BaseModule):
         # this is fine; az input tényleg DataObject, mert constraint miatt elvárt, hogy FeatureVector, ami a DataObject-ből származik
         result=self.process(cast(DataObject | List[DataObject], features))
 
-        if (not isinstance(result, ClassificationResult)) and ((not isinstance(result, list)) or not isinstance(result[0], ClassificationResult)):
+        if (not isinstance(result, ClassificationResult)) and ((not isinstance(result, list)) or (len(result)>0 and not isinstance(result[0], ClassificationResult))):
             raise Exception("Error in "+self.name+": Output type is not ClassificationResult or List[ClassificationResult]")
         return cast(ClassificationResult | List[ClassificationResult], result)
 
