@@ -90,4 +90,5 @@ def get_preprocessing_type_names() -> Dict[str, str]:
         "Split": "Split",
         "Blur": "Blur",
         "Edge detection": "Edge detection",
+        "SkinColorSegmenter": "SkinColorSegmenter"
     }
