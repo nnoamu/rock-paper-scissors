@@ -11,23 +11,21 @@ def create_pipeline_arrow():
         gr.HTML(render('pipeline_arrow.html'))
 
 
-def create_step_1(preprocessors):
-    with gr.Column(scale=1):
-        with gr.Group(elem_classes="pipeline-step-small active"):
-            gr.HTML(render(
-                'step_header.html',
-                number=1,
-                title="Preprocessing",
-                disabled=False
-            ))
-            with gr.Group(elem_classes="step-content"):
-                preproc_dropdown = gr.Dropdown(
-                    choices=list(preprocessors.keys()),
-                    value=list(preprocessors.keys())[0] if preprocessors else "None",
-                    label="",
-                    container=False
-                )
-    return preproc_dropdown
+def create_step_1(preprocessors, step_factory):
+    """Create preprocessing pipeline UI (replaces single dropdown)."""
+    from ui.components.preprocessing_pipeline_ui import create_preprocessing_pipeline_ui
+    
+    # Get type names for the pipeline UI
+    preprocessor_type_names = list(preprocessors.keys())
+    
+    # Create the pipeline UI
+    (pipeline_state, steps_container, add_step_dropdown, add_step_btn,
+     reset_btn) = create_preprocessing_pipeline_ui(
+        preprocessor_type_names, step_factory
+    )
+    
+    return (pipeline_state, steps_container, add_step_dropdown, add_step_btn,
+            reset_btn)
 
 
 def create_step_2(feature_extractors):
@@ -68,17 +66,26 @@ def create_step_3(classifiers):
     return classifier_dropdown
 
 
-def create_pipeline_steps_block(preprocessors, feature_extractors, classifiers):
+def create_pipeline_steps_block(preprocessors, feature_extractors, classifiers, step_factory=None):
+    """Create pipeline steps block with new preprocessing pipeline UI."""
+    from core.preprocessing_factory import create_preprocessing_module
+    
+    if step_factory is None:
+        step_factory = create_preprocessing_module
 
     with gr.Group():
         with gr.Row():
-            preproc_dropdown = create_step_1(preprocessors)
+            (preproc_pipeline_state, preproc_steps_container, preproc_add_dropdown, 
+             preproc_add_btn, preproc_reset_btn) = create_step_1(preprocessors, step_factory)
         with gr.Row():
             feature_dropdown = create_step_2(feature_extractors)
         with gr.Row():
             classifier_dropdown = create_step_3(classifiers)
     
-    return preproc_dropdown, feature_dropdown, classifier_dropdown
+    # Return all components
+    return (preproc_pipeline_state, feature_dropdown, classifier_dropdown,
+            preproc_steps_container, preproc_add_dropdown, preproc_add_btn,
+            preproc_reset_btn)
 
 
 class ResultStep:

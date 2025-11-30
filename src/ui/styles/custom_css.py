@@ -224,10 +224,18 @@ def get_custom_css():
     }
 
     .upload-container {
-    font-size: 4px !important;
+        font-size: 4px !important;
     }
     
     .upload-container > .image-frame {
-    height: 0px !important;
+        height: 0px !important;
+    }
+
+    .no-step {
+        padding: 0.4rem 1rem !important;
+    }
+
+    .preprocessing-step-display {
+        padding: 0.4rem 1rem !important;
     }
     """
