@@ -12,7 +12,11 @@ from preprocessing import (
     GaussianBlurModule,
     EdgeDetectorModule,
     SkinColorSegmenterModule,
-    DownscaleWithInterpolationPreprocessor
+    DownscaleWithInterpolationPreprocessor,
+    EdgeSmoothingModule,
+    HoleClosingModule,
+    ObjectSeparatorModule,
+    ThresholdFillModule,
 )
 
 
@@ -36,6 +40,8 @@ def create_preprocessing_module(step_type: str, parameters: Dict[str, Any] = Non
         return DownscaleModule(max_dimension_length=640)
     elif step_type == "Downscale (480px)":
         return DownscaleModule(max_dimension_length=480)
+    elif step_type == "Downscale (300px)":
+        return DownscaleModule(max_dimension_length=300)
     elif step_type == "Downscale with interpolation (640px)":
         return DownscaleWithInterpolationPreprocessor(max_size=640)
     elif step_type == "Downscale with interpolation (480px)":
@@ -59,11 +65,14 @@ def create_preprocessing_module(step_type: str, parameters: Dict[str, Any] = Non
         return ChannelSplitter()
     elif step_type == "GaussianBlur":
         return GaussianBlurModule()
-    elif step_type == "EdgeDetector":
-        return EdgeDetectorModule(
-            lower_thresh=int(parameters.get("lower_thresh", 0)),
-            upper_thresh=int(parameters.get("upper_thresh", 40))
-        )
+    elif step_type == "EdgeSmoothing":
+        return EdgeSmoothingModule()
+    elif step_type == "HoleClosing":
+        return HoleClosingModule()
+    elif step_type == "ObjectSeparator":
+        return ObjectSeparatorModule()
+    elif step_type == "ThresholdFill":
+        return ThresholdFillModule()
     elif step_type == "SkinColorSegmenter":
         return SkinColorSegmenterModule(
             parameters.get("model_path", "models/skin_segmentation/model1")
@@ -84,11 +93,16 @@ def get_preprocessing_type_names() -> Dict[str, str]:
         "None": "None",
         "Downscale (640px)": "Downscale (640px)",
         "Downscale (480px)": "Downscale (480px)",
+        "Downscale (300px)": "Downscale (300px)",
         "Downscale with interpolation (640px)": "Downscale with interpolation (640px)",
         "Downscale with interpolation (480px)": "Downscale with interpolation (480px)",
         "Grayscale": "Grayscale",
         "Split": "Split",
         "Blur": "Blur",
         "Edge detection": "Edge detection",
-        "SkinColorSegmenter": "SkinColorSegmenter"
+        "SkinColorSegmenter": "SkinColorSegmenter",
+        "EdgeSmoothing": "EdgeSmoothing",
+        "HoleClosing": "HoleClosing",
+        "ObjectSeparator": "ObjectSeparator",
+        "ThresholdFill": "ThresholdFill"
     }
