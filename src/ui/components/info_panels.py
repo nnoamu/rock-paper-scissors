@@ -49,7 +49,7 @@ class DebugLog:
                 value="",
                 container=False,
                 interactive=False,
-                lines=8,
+                lines=20,
                 elem_classes="debug-log"
             )
         return self.component
