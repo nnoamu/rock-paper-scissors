@@ -360,7 +360,8 @@ class MainInterface:
                                 value=self.result_step._current_confidence,
                                 container=False,
                                 interactive=False,
-                                elem_classes="confidence-output-inline"
+                                elem_classes="confidence-output-inline",
+                                lines=4
                             )
                             self.result_step.confidence_component = conf_out
 
