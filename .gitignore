@@ -184,14 +184,21 @@ data/mediapipe_features/**
 !data/skincolor/.gitkeep
 !data/README.md
 
+!data/processed/drgfreeman
+!data/processed/drgfreeman/hu_moments.pkl
+!data/processed/hectorandac
+!data/processed/hectorandac/hu_moments.pkl
+
 # Models - ignore contents, keep structure
 #models/**
 #!models/.gitkeep
+**/log
 
 # Model and data files
 #*.pkl
 *.npz
 *.h5
+#*.pth
 
 # I like testing stuff here and I don't wanna delete it every time :D (Gergo)
 src/test.py

@@ -1,0 +1,11 @@
+[NETWORK]
+num_layers = 6
+layer_density = 50
+
+[TRAINING]
+num_epochs = 10
+batch_size = 2048
+learning_rate = 0.01
+scale_factor = 0.1
+patience = 1
+
